@@ -1,0 +1,16 @@
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+SCREEN_TITLE = "Survivor Game"
+
+SPRITE_SCALING = 0.25
+SPRITE_SIZE = 32
+
+GRID_WIDTH = 40
+GRID_HEIGHT = 20
+
+MAP_WALL = 'W'  # Wall
+MAP_WALL_T = 'WT'  # Wall
+MAP_OBSTACLE = 'O'  # Obstacle
+MAP_OBSTACLE2 = 'O2'  # Start
+MAP_OBSTACLE3 = 'O3'  # Start
+MAP_EMPTY = 'E'  # Empty
