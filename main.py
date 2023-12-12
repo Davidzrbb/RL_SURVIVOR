@@ -1,20 +1,25 @@
 import arcade
 from constants import *
+from game_environment.enemy import Enemy
 from game_environment.map import Environment
 from rl.agent import Agent
 
 
 class MyWindow(arcade.Window):
     def __init__(self):
-        super().__init__(GRID_WIDTH * SPRITE_SIZE,
-                         GRID_HEIGHT * SPRITE_SIZE, "Survivor Game")
+        super().__init__(GRID_WIDTH * SPRITE_SIZE, GRID_HEIGHT * SPRITE_SIZE, SCREEN_TITLE)
         self.environment = Environment(self)
         self.agent = Agent(self, self.environment)
+        self.enemy = Enemy(self.agent)
 
     def on_draw(self):
         arcade.start_render()
         self.environment.on_draw()
         self.agent.on_draw()
+        self.enemy.on_draw()
+
+    def on_update(self, delta_time):
+        self.enemy.on_update(delta_time)
 
 
 def main():

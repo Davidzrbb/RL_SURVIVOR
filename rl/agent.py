@@ -10,9 +10,7 @@ class Agent:
         self.setup()
 
     def setup(self):
-        # Create the Sprite lists
         self.agent = arcade.SpriteList()
-        # Set up the player
         self.agent_sprite = arcade.Sprite(
             ":resources:images/animated_characters/male_adventurer/maleAdventurer_walk0.png", SPRITE_SCALING * 1.5)
         for state in self.env.states:
@@ -32,3 +30,5 @@ class Agent:
         if self.env.map_object[state] == MAP_EMPTY:
             self.env.map_object[state] = MAP_AGENT
         return self.env.map_object[state]
+
+
