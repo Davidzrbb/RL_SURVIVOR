@@ -50,7 +50,7 @@ class Environment:
         self.states = procedural_map().keys()
         self.player_sprite = None
         self.obstacle_list = None
-        self.__map, self.rows, self.cols = procedural_map(), GRID_HEIGHT, GRID_WIDTH
+        self.map_object, self.rows, self.cols = procedural_map(), GRID_HEIGHT, GRID_WIDTH
         self.setup()
 
     def setup(self):
@@ -125,7 +125,7 @@ class Environment:
                 self.obstacle_list.append(obstacle_sprite)
 
     def map(self, state):
-        return self.__map[state]
+        return self.map_object[state]
 
     def state_to_xy(self, state):
         return (state[1] + 0.5) * SPRITE_SIZE, \

@@ -1,6 +1,7 @@
 import arcade
 from constants import *
 from game_environment.map import Environment
+from rl.agent import Agent
 
 
 class MyWindow(arcade.Window):
@@ -8,10 +9,12 @@ class MyWindow(arcade.Window):
         super().__init__(GRID_WIDTH * SPRITE_SIZE,
                          GRID_HEIGHT * SPRITE_SIZE, "Survivor Game")
         self.environment = Environment(self)
+        self.agent = Agent(self, self.environment)
 
     def on_draw(self):
         arcade.start_render()
         self.environment.on_draw()
+        self.agent.on_draw()
 
 
 def main():

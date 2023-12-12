@@ -14,3 +14,4 @@ MAP_OBSTACLE = 'O'  # Obstacle
 MAP_OBSTACLE2 = 'O2'  # Start
 MAP_OBSTACLE3 = 'O3'  # Start
 MAP_EMPTY = 'E'  # Empty
+MAP_AGENT = 'A'  # Agent
