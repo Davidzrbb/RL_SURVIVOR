@@ -54,6 +54,8 @@ class Enemy:
         self.setup()
 
     def setup(self):
+        # reset the enemy
+        self.enemy_sprite_list = arcade.SpriteList()
         count = 0
         while count < nb_enemies:
             width_random, height_random = random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1)

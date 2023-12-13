@@ -44,13 +44,16 @@ def procedural_map():
 
 class Environment:
     def __init__(self, window):
+        self.cols = None
+        self.rows = None
+        self.map_object = None
+        self.states = None
         self.wall_list = None
         self.empty_list = None
         self.wall_T_list = None
-        self.states = procedural_map().keys()
         self.player_sprite = None
         self.obstacle_list = None
-        self.map_object, self.rows, self.cols = procedural_map(), GRID_HEIGHT, GRID_WIDTH
+        
         self.setup()
 
     def setup(self):
@@ -60,7 +63,8 @@ class Environment:
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.obstacle_list = arcade.SpriteList(use_spatial_hash=True)
         self.empty_list = arcade.SpriteList(use_spatial_hash=True)
-
+        self.states = procedural_map().keys()
+        self.map_object, self.rows, self.cols = procedural_map(), GRID_HEIGHT, GRID_WIDTH
         for state in self.states:
             if self.map(state) == MAP_WALL:
                 wall_sprite = arcade.Sprite(":resources:images/topdown_tanks/tileGrass_transitionN.png",

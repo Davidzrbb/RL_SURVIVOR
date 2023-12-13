@@ -25,6 +25,13 @@ class MyWindow(arcade.Window):
     #     self.agent.agent_sprite.center_x = x
     #     self.agent.agent_sprite.center_y = y
 
+    # if press R, reset the ennemy
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.R:
+            self.environment.setup()
+            self.agent.setup()
+            self.enemy.setup()
+
 
 def main():
     window = MyWindow()
