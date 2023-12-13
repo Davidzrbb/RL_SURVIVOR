@@ -21,6 +21,10 @@ class MyWindow(arcade.Window):
     def on_update(self, delta_time):
         self.enemy.on_update(delta_time)
 
+    # def on_mouse_motion(self, x, y, dx, dy):
+    #     self.agent.agent_sprite.center_x = x
+    #     self.agent.agent_sprite.center_y = y
+
 
 def main():
     window = MyWindow()

@@ -7,21 +7,17 @@ nb_enemies = 10
 
 
 class EnemySprite(Sprite):
-    def __init__(self, filename, scale, agent, enemy_sprite_list):
+    def __init__(self, filename, scale, agent):
         super().__init__(filename, scale, hit_box_algorithm="Simple")
+        self.path = None
         self.barrier_list = None
-        self.hit_list = None
         self.env = agent.env
-        self.enemy_sprite_list = enemy_sprite_list
-
-    def follow_agent(self, agent_sprite):
         grid_size = SPRITE_SIZE
 
-        # Calculate the playing field size. We can't generate paths outside of
-        # this.
+        # Calculate the playing field size. We can't generate paths outside of this.
         playing_field_left_boundary = 0
-        playing_field_right_boundary = 800  # ou une valeur appropriée
-        playing_field_top_boundary = 600  # ou une valeur appropriée
+        playing_field_right_boundary = GRID_WIDTH * SPRITE_SIZE  # ou une valeur appropriée
+        playing_field_top_boundary = GRID_HEIGHT * SPRITE_SIZE  # ou une valeur appropriée
         playing_field_bottom_boundary = 0
 
         # Utilisez une liste contenant votre sprite ennemi comme premier argument
@@ -32,15 +28,22 @@ class EnemySprite(Sprite):
                                                     playing_field_bottom_boundary,
                                                     playing_field_top_boundary)
 
-        start = (self.center_x, self.center_y)  # Utilisez le centre du sprite comme point de départ
-        end = (agent_sprite.center_x, agent_sprite.center_y)  # Utilisez le centre du sprite comme point final
-        print(start, end)
-        self.path = arcade.astar_calculate_path(start, end, self.barrier_list, diagonal_movement=False)
+    def follow_agent(self, agent_sprite):
+        start = (self.center_x, self.center_y)
+        end = (agent_sprite.center_x, agent_sprite.center_y)
 
-        # Déplacez le sprite le long du chemin
-        if self.path:
-            self.center_x, self.center_y = self.path[len(self.path) - 1]
-            self.path.pop(0)
+        self.path = arcade.astar_calculate_path(start, end, self.barrier_list,
+                                                diagonal_movement=True)
+        if self.path and len(self.path) > 1:
+            if self.center_y < self.path[1][1]:
+                self.center_y += min(SPRITE_SPEED, self.path[1][1] - self.center_y)
+            elif self.center_y > self.path[1][1]:
+                self.center_y -= min(SPRITE_SPEED, self.center_y - self.path[1][1])
+
+            if self.center_x < self.path[1][0]:
+                self.center_x += min(SPRITE_SPEED, self.path[1][0] - self.center_x)
+            elif self.center_x > self.path[1][0]:
+                self.center_x -= min(SPRITE_SPEED, self.center_x - self.path[1][0])
 
 
 class Enemy:
@@ -58,10 +61,12 @@ class Enemy:
                                                                               height_random) == MAP_ENEMY2:
                 if self.map(width_random, height_random) == MAP_ENEMY:
                     enemy_sprite = EnemySprite(":resources:images/animated_characters/zombie/zombie_walk0.png",
-                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list)
+                                               SPRITE_SCALING * 1.3, self.agent,
+                                               )
                 else:
                     enemy_sprite = EnemySprite(":resources:images/animated_characters/robot/robot_walk0.png",
-                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list)
+                                               SPRITE_SCALING * 1.3, self.agent,
+                                               )
                 enemy_sprite.center_x, enemy_sprite.center_y = self.state_to_xy((height_random, width_random))
                 self.enemy_sprite_list.append(enemy_sprite)
                 count += 1
@@ -74,7 +79,8 @@ class Enemy:
             enemy.follow_agent(self.agent.agent_sprite)
 
     def state_to_xy(self, state):
-        return (state[1] + 0.5) * SPRITE_SIZE, (self.env.rows - state[0] - 0.5) * SPRITE_SIZE
+        return (state[1] + 0.5) * SPRITE_SIZE, \
+               (self.env.rows - state[0] - 0.5) * SPRITE_SIZE
 
     def map(self, width_random, height_random):
         state = (height_random, width_random)
