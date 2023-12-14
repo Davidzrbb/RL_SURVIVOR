@@ -11,7 +11,14 @@ class Agent:
         self.agent_sprite = None
         self.agent = None
         self.env = env
+        self.bar_list = None
+        self.indicator_bar = None
+        self.health: int = PLAYER_HEALTH
+        self.window = window
         self.setup()
+
+    def setup(self):
+        self.agent = arcade.SpriteList()
         self.bar_list = arcade.SpriteList()
         self.indicator_bar = IndicatorBar(
             owner=self,
@@ -23,10 +30,6 @@ class Agent:
             height=4,
             border_size=4,
         )
-        self.health: int = PLAYER_HEALTH
-
-    def setup(self):
-        self.agent = arcade.SpriteList()
         self.agent_sprite = arcade.Sprite(
             ":resources:images/animated_characters/male_adventurer/maleAdventurer_walk0.png", SPRITE_SCALING * 1.5)
 

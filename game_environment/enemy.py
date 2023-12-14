@@ -32,12 +32,11 @@ class EnemySprite(Sprite):
                                                     playing_field_top_boundary)
         self.physics_engine = arcade.PhysicsEngineSimple(self,
                                                          self.ennemies)
-        # check hitbox between ennemies and agent
 
     def follow_agent(self, agent_sprite):
         self.check_hitbox = arcade.check_for_collision(self, agent_sprite)
         if self.check_hitbox:
-            # random hitbox
+            # SI ENNEMI TOUCHE AGENT
             if random.randint(0, 100) < 10:
                 self.agent.indicator_bar.fullness -= 0.1
         self.physics_engine.update()

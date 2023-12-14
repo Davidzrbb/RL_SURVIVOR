@@ -72,20 +72,6 @@ class Bullet(arcade.Sprite):
 
 
 class IndicatorBar:
-    """
-    Represents a bar which can display information about a sprite.
-
-    :param Player owner: The owner of this indicator bar.
-    :param arcade.SpriteList sprite_list: The sprite list used to draw the indicator
-    bar components.
-    :param Tuple[float, float] position: The initial position of the bar.
-    :param arcade.Color full_color: The color of the bar.
-    :param arcade.Color background_color: The background color of the bar.
-    :param int width: The width of the bar.
-    :param int height: The height of the bar.
-    :param int border_size: The size of the bar's border.
-    """
-
     def __init__(
         self,
         owner: Player,
