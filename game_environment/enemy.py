@@ -9,11 +9,13 @@ nb_enemies = 10
 class EnemySprite(Sprite):
     def __init__(self, filename, scale, agent, ennemies):
         super().__init__(filename, scale, hit_box_algorithm="Simple")
+        self.check_hitbox = None
         self.path = None
         self.barrier_list = None
         self.env = agent.env
         grid_size = SPRITE_SIZE
         self.ennemies = ennemies
+        self.agent = agent
 
         # Calculate the playing field size. We can't generate paths outside of this.
         playing_field_left_boundary = 0
@@ -30,12 +32,17 @@ class EnemySprite(Sprite):
                                                     playing_field_top_boundary)
         self.physics_engine = arcade.PhysicsEngineSimple(self,
                                                          self.ennemies)
+        # check hitbox between ennemies and agent
 
     def follow_agent(self, agent_sprite):
+        self.check_hitbox = arcade.check_for_collision(self, agent_sprite)
+        if self.check_hitbox:
+            # random hitbox
+            if random.randint(0, 100) < 10:
+                self.agent.indicator_bar.fullness -= 0.1
         self.physics_engine.update()
         start = (self.center_x, self.center_y)
         end = (agent_sprite.center_x, agent_sprite.center_y)
-
         self.path = arcade.astar_calculate_path(start, end, self.barrier_list,
                                                 diagonal_movement=True)
         if self.path and len(self.path) > 1:
