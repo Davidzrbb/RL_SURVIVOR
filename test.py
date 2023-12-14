@@ -1,272 +1,304 @@
 """
-A-Star Path-finding
+Sprite Health Bars
 
 Artwork from https://kenney.nl
 
 If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.astar_pathfinding
+python -m arcade.examples.sprite_health
 """
+import math
+from typing import Tuple
 
 import arcade
-import random
+from arcade.resources import (
+    image_female_person_idle,
+    image_laser_blue01,
+    image_zombie_idle,
+)
 
-SPRITE_IMAGE_SIZE = 128
-SPRITE_SCALING = 0.25
-SPRITE_SIZE = int(SPRITE_IMAGE_SIZE * SPRITE_SCALING)
+SPRITE_SCALING_PLAYER = 0.5
+SPRITE_SCALING_ENEMY = 0.5
+SPRITE_SCALING_BULLET = 1
+INDICATOR_BAR_OFFSET = 32
+ENEMY_ATTACK_COOLDOWN = 1
+BULLET_SPEED = 150
+BULLET_DAMAGE = 1
+PLAYER_HEALTH = 5
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-SCREEN_TITLE = "A-Star Path-finding"
+SCREEN_TITLE = "Sprite Health Bars"
 
-MOVEMENT_SPEED = 5
 
-VIEWPORT_MARGIN = 100
+def sprite_off_screen(
+    sprite: arcade.Sprite,
+    screen_height: int = SCREEN_HEIGHT,
+    screen_width: int = SCREEN_WIDTH,
+) -> bool:
+    """Checks if a sprite is off-screen or not."""
+    return (
+        sprite.top < 0
+        or sprite.bottom > screen_height
+        or sprite.right < 0
+        or sprite.left > screen_width
+    )
+
+
+class Player(arcade.Sprite):
+    def __init__(self, bar_list: arcade.SpriteList) -> None:
+        super().__init__(
+            filename=image_female_person_idle,
+            scale=SPRITE_SCALING_PLAYER,
+        )
+        self.indicator_bar: IndicatorBar = IndicatorBar(
+            self, bar_list, (self.center_x, self.center_y)
+        )
+        self.health: int = PLAYER_HEALTH
+
+
+class Bullet(arcade.Sprite):
+    def __init__(self) -> None:
+        super().__init__(
+            filename=image_laser_blue01,
+            scale=SPRITE_SCALING_BULLET,
+        )
+
+    def on_update(self, delta_time: float = 1 / 60) -> None:
+        """Updates the bullet's position."""
+        self.position = (
+            self.center_x + self.change_x * delta_time,
+            self.center_y + self.change_y * delta_time,
+        )
+
+
+class IndicatorBar:
+    """
+    Represents a bar which can display information about a sprite.
+
+    :param Player owner: The owner of this indicator bar.
+    :param arcade.SpriteList sprite_list: The sprite list used to draw the indicator
+    bar components.
+    :param Tuple[float, float] position: The initial position of the bar.
+    :param arcade.Color full_color: The color of the bar.
+    :param arcade.Color background_color: The background color of the bar.
+    :param int width: The width of the bar.
+    :param int height: The height of the bar.
+    :param int border_size: The size of the bar's border.
+    """
+
+    def __init__(
+        self,
+        owner: Player,
+        sprite_list: arcade.SpriteList,
+        position: Tuple[float, float] = (0, 0),
+        full_color: arcade.Color = arcade.color.GREEN,
+        background_color: arcade.Color = arcade.color.BLACK,
+        width: int = 100,
+        height: int = 4,
+        border_size: int = 4,
+    ) -> None:
+        # Store the reference to the owner and the sprite list
+        self.owner: Player = owner
+        self.sprite_list: arcade.SpriteList = sprite_list
+
+        # Set the needed size variables
+        self._box_width: int = width
+        self._box_height: int = height
+        self._half_box_width: int = self._box_width // 2
+        self._center_x: float = 0.0
+        self._center_y: float = 0.0
+        self._fullness: float = 0.0
+
+        # Create the boxes needed to represent the indicator bar
+        self._background_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(
+            self._box_width + border_size,
+            self._box_height + border_size,
+            background_color,
+        )
+        self._full_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(
+            self._box_width,
+            self._box_height,
+            full_color,
+        )
+        self.sprite_list.append(self._background_box)
+        self.sprite_list.append(self._full_box)
+
+        # Set the fullness and position of the bar
+        self.fullness: float = 1.0
+        self.position: Tuple[float, float] = position
+
+    def __repr__(self) -> str:
+        return f"<IndicatorBar (Owner={self.owner})>"
+
+    @property
+    def background_box(self) -> arcade.SpriteSolidColor:
+        """Returns the background box of the indicator bar."""
+        return self._background_box
+
+    @property
+    def full_box(self) -> arcade.SpriteSolidColor:
+        """Returns the full box of the indicator bar."""
+        return self._full_box
+
+    @property
+    def fullness(self) -> float:
+        """Returns the fullness of the bar."""
+        return self._fullness
+
+    @fullness.setter
+    def fullness(self, new_fullness: float) -> None:
+        """Sets the fullness of the bar."""
+        # Check if new_fullness if valid
+        if not (0.0 <= new_fullness <= 1.0):
+            raise ValueError(
+                f"Got {new_fullness}, but fullness must be between 0.0 and 1.0."
+            )
+
+        # Set the size of the bar
+        self._fullness = new_fullness
+        if new_fullness == 0.0:
+            # Set the full_box to not be visible since it is not full anymore
+            self.full_box.visible = False
+        else:
+            # Set the full_box to be visible incase it wasn't then update the bar
+            self.full_box.visible = True
+            self.full_box.width = self._box_width * new_fullness
+            self.full_box.left = self._center_x - (self._box_width // 2)
+
+    @property
+    def position(self) -> Tuple[float, float]:
+        """Returns the current position of the bar."""
+        return self._center_x, self._center_y
+
+    @position.setter
+    def position(self, new_position: Tuple[float, float]) -> None:
+        """Sets the new position of the bar."""
+        # Check if the position has changed. If so, change the bar's position
+        if new_position != self.position:
+            self._center_x, self._center_y = new_position
+            self.background_box.position = new_position
+            self.full_box.position = new_position
+
+            # Make sure full_box is to the left of the bar instead of the middle
+            self.full_box.left = self._center_x - (self._box_width // 2)
 
 
 class MyGame(arcade.Window):
-    """
-    Main application class.
-    """
+    def __init__(self) -> None:
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        self.bullet_list = arcade.SpriteList()
+        self.bar_list = arcade.SpriteList()
+        self.player_sprite = Player(self.bar_list)
+        self.enemy_sprite = arcade.Sprite(image_zombie_idle, SPRITE_SCALING_ENEMY)
+        self.top_text: arcade.Text = arcade.Text(
+            "Dodge the bullets by moving the mouse!",
+            self.width // 2,
+            self.height - 50,
+            anchor_x="center",
+        )
+        self.bottom_text: arcade.Text = arcade.Text(
+            "When your health bar reaches zero, you lose!",
+            self.width // 2,
+            50,
+            anchor_x="center",
+        )
+        self.enemy_timer = 0
 
-    def __init__(self, width, height, title):
-        """
-        Initializer
-        """
+    def setup(self) -> None:
+        """Set up the game and initialize the variables."""
+        # Setup player and enemy positions
+        self.player_sprite.position = self.width // 2, self.height // 4
+        self.enemy_sprite.position = self.width // 2, self.height // 2
 
-        # Call the parent class initializer
-        super().__init__(width, height, title)
-
-        # Variables that will hold sprite lists
-        self.player_list = None
-        self.wall_list = None
-        self.enemy_list = None
-
-        # Set up the player info
-        self.player = None
-
-        # Track the current state of what key is pressed
-        self.left_pressed = False
-        self.right_pressed = False
-        self.up_pressed = False
-        self.down_pressed = False
-
-        self.physics_engine = None
-
-        # --- Related to paths
-        # List of points that makes up a path between two points
-        self.path = None
-        # List of points we checked to see if there is a barrier there
-        self.barrier_list = None
-
-        # Used in scrolling
-        self.view_bottom = 0
-        self.view_left = 0
-
-        # Set the window background color
+        # Set the background color
         self.background_color = arcade.color.AMAZON
 
-    def setup(self):
-        """ Set up the game and initialize the variables. """
-
-        # Sprite lists
-        self.player_list = arcade.SpriteList()
-        self.wall_list = arcade.SpriteList(use_spatial_hash=True,
-                                           spatial_hash_cell_size=128)
-        self.enemy_list = arcade.SpriteList()
-
-        # Set up the player
-        resource = ":resources:images/animated_characters/" \
-                   "female_person/femalePerson_idle.png"
-        self.player = arcade.Sprite(resource, SPRITE_SCALING)
-        self.player.center_x = SPRITE_SIZE * 5
-        self.player.center_y = SPRITE_SIZE * 1
-        self.player_list.append(self.player)
-
-        # Set enemies
-        resource = ":resources:images/animated_characters/zombie/zombie_idle.png"
-        enemy = arcade.Sprite(resource, SPRITE_SCALING)
-        enemy.center_x = SPRITE_SIZE * 4
-        enemy.center_y = SPRITE_SIZE * 7
-        self.enemy_list.append(enemy)
-
-        spacing = SPRITE_SIZE * 3
-        for column in range(10):
-            for row in range(15):
-                sprite = arcade.Sprite(":resources:images/tiles/grassCenter.png",
-                                       SPRITE_SCALING)
-
-                x = (column + 1) * spacing
-                y = (row + 1) * sprite.height
-
-                sprite.center_x = x
-                sprite.center_y = y
-                if random.randrange(100) > 30:
-                    self.wall_list.append(sprite)
-
-        self.physics_engine = arcade.PhysicsEngineSimple(self.player,
-                                                         self.wall_list)
-
-        # --- Path related
-        # This variable holds the travel-path. We keep it as an attribute so
-        # we can calculate it in on_update, and draw it in on_draw.
-        self.path = None
-        # Grid size for calculations. The smaller the grid, the longer the time
-        # for calculations. Make sure the grid aligns with the sprite wall grid,
-        # or some openings might be missed.
-        grid_size = SPRITE_SIZE
-
-        # Calculate the playing field size. We can't generate paths outside of
-        # this.
-        playing_field_left_boundary = -SPRITE_SIZE * 2
-        playing_field_right_boundary = SPRITE_SIZE * 35
-        playing_field_top_boundary = SPRITE_SIZE * 17
-        playing_field_bottom_boundary = -SPRITE_SIZE * 2
-
-        # This calculates a list of barriers. By calculating it here in the
-        # init, we are assuming this list does not change. In this example,
-        # our walls don't move, so that is ok. If we want moving barriers (such as
-        # moving platforms or enemies) we need to recalculate. This can be an
-        # time-intensive process depending on the playing field size and grid
-        # resolution.
-
-        # Note: If the enemy sprites are the same size, we only need to calculate
-        # one of these. We do NOT need a different one for each enemy. The sprite
-        # is just used for a size calculation.
-
-    def on_draw(self):
-        """
-        Render the screen.
-        """
-        # This command has to happen before we start drawing
+    def on_draw(self) -> None:
+        """Render the screen."""
+        # Clear the screen. This command has to happen before we start drawing
         self.clear()
 
-        # Draw all the sprites.
-        self.player_list.draw()
-        self.wall_list.draw()
-        self.enemy_list.draw()
+        # Draw all the sprites
+        self.player_sprite.draw()
+        self.enemy_sprite.draw()
+        self.bullet_list.draw()
+        self.bar_list.draw()
 
-        if self.path:
-            arcade.draw_line_strip(self.path, arcade.color.BLUE, 2)
+        # Draw the text objects
+        self.top_text.draw()
+        self.bottom_text.draw()
 
-    def on_update(self, delta_time):
-        """ Movement and game logic """
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float) -> None:
+        """Called whenever the mouse moves."""
+        self.player_sprite.position = x, y
 
-        # Calculate speed based on the keys pressed
-        self.player.change_x = 0
-        self.player.change_y = 0
+    def on_update(self, delta_time) -> None:
+        """Movement and game logic."""
+        # Check if the player is dead. If so, exit the game
+        if self.player_sprite.health <= 0:
+            arcade.exit()
 
-        if self.up_pressed and not self.down_pressed:
-            self.player.change_y = MOVEMENT_SPEED
-        elif self.down_pressed and not self.up_pressed:
-            self.player.change_y = -MOVEMENT_SPEED
-        if self.left_pressed and not self.right_pressed:
-            self.player.change_x = -MOVEMENT_SPEED
-        elif self.right_pressed and not self.left_pressed:
-            self.player.change_x = MOVEMENT_SPEED
+        # Increase the enemy's timer
+        self.enemy_timer += delta_time
 
-        # Update the character
-        self.physics_engine.update()
+        # Update the player's indicator bar position
+        self.player_sprite.indicator_bar.position = (
+            self.player_sprite.center_x,
+            self.player_sprite.center_y + INDICATOR_BAR_OFFSET,
+        )
 
-        # Calculate a path to the player
-        enemy = self.enemy_list[0]
-        # Set to True if we can move diagonally. Note that diagonal movement
-        # might cause the enemy to clip corners.
-        grid_size = SPRITE_SIZE
+        # Call updates on bullet sprites
+        self.bullet_list.on_update(delta_time)
 
-        # Calculate the playing field size. We can't generate paths outside of
-        # this.
-        playing_field_left_boundary = -SPRITE_SIZE * 2
-        playing_field_right_boundary = SPRITE_SIZE * 35
-        playing_field_top_boundary = SPRITE_SIZE * 17
-        playing_field_bottom_boundary = -SPRITE_SIZE * 2
-        print(enemy)
-        self.barrier_list = arcade.AStarBarrierList(enemy,
-                                                    self.wall_list,
-                                                    grid_size,
-                                                    playing_field_left_boundary,
-                                                    playing_field_right_boundary,
-                                                    playing_field_bottom_boundary,
-                                                    playing_field_top_boundary)
+        # Check if the enemy can attack. If so, shoot a bullet from the
+        # enemy towards the player
+        if self.enemy_timer >= ENEMY_ATTACK_COOLDOWN:
+            self.enemy_timer = 0
 
-        self.path = arcade.astar_calculate_path(enemy.position,
-                                                self.player.position,
-                                                self.barrier_list,
-                                                diagonal_movement=False)
-        # print(self.path,"->", self.player.position)
+            # Create the bullet
+            bullet = Bullet()
 
-        # --- Manage Scrolling ---
+            # Set the bullet's position
+            bullet.position = self.enemy_sprite.position
 
-        # Keep track of if we changed the boundary. We don't want to call the
-        # set_viewport command if we didn't change the view port.
-        changed = False
+            # Set the bullet's angle to face the player
+            diff_x = self.player_sprite.center_x - self.enemy_sprite.center_x
+            diff_y = self.player_sprite.center_y - self.enemy_sprite.center_y
+            angle = math.atan2(diff_y, diff_x)
+            angle_deg = math.degrees(angle)
+            if angle_deg < 0:
+                angle_deg += 360
+            bullet.angle = angle_deg
 
-        # Scroll left
-        left_boundary = self.view_left + VIEWPORT_MARGIN
-        if self.player.left < left_boundary:
-            self.view_left -= left_boundary - self.player.left
-            changed = True
+            # Give the bullet a velocity towards the player
+            bullet.change_x = math.cos(angle) * BULLET_SPEED
+            bullet.change_y = math.sin(angle) * BULLET_SPEED
 
-        # Scroll right
-        right_boundary = self.view_left + SCREEN_WIDTH - VIEWPORT_MARGIN
-        if self.player.right > right_boundary:
-            self.view_left += self.player.right - right_boundary
-            changed = True
+            # Add the bullet to the bullet list
+            self.bullet_list.append(bullet)
 
-        # Scroll up
-        top_boundary = self.view_bottom + SCREEN_HEIGHT - VIEWPORT_MARGIN
-        if self.player.top > top_boundary:
-            self.view_bottom += self.player.top - top_boundary
-            changed = True
+        # Loop through each bullet
+        for existing_bullet in self.bullet_list:
+            # Check if the bullet has gone off-screen. If so, delete the bullet
+            if sprite_off_screen(existing_bullet):
+                existing_bullet.remove_from_sprite_lists()
+                continue
 
-        # Scroll down
-        bottom_boundary = self.view_bottom + VIEWPORT_MARGIN
-        if self.player.bottom < bottom_boundary:
-            self.view_bottom -= bottom_boundary - self.player.bottom
-            changed = True
+            # Check if the bullet has hit the player
+            if arcade.check_for_collision(existing_bullet, self.player_sprite):
+                # Damage the player and remove the bullet
+                self.player_sprite.health -= BULLET_DAMAGE
+                existing_bullet.remove_from_sprite_lists()
 
-        # Make sure our boundaries are integer values. While the view port does
-        # support floating point numbers, for this application we want every pixel
-        # in the view port to map directly onto a pixel on the screen. We don't want
-        # any rounding errors.
-        self.view_left = int(self.view_left)
-        self.view_bottom = int(self.view_bottom)
-
-        # If we changed the boundary values, update the view port to match
-        if changed:
-            arcade.set_viewport(self.view_left,
-                                SCREEN_WIDTH + self.view_left,
-                                self.view_bottom,
-                                SCREEN_HEIGHT + self.view_bottom)
+                # Set the player's indicator bar fullness
+                self.player_sprite.indicator_bar.fullness = (
+                    self.player_sprite.health / PLAYER_HEALTH
+                )
 
 
-    def on_key_press(self, key, modifiers):
-        """Called whenever a key is pressed. """
-
-        if key == arcade.key.UP:
-            self.up_pressed = True
-        elif key == arcade.key.DOWN:
-            self.down_pressed = True
-        elif key == arcade.key.LEFT:
-            self.left_pressed = True
-        elif key == arcade.key.RIGHT:
-            self.right_pressed = True
-
-    def on_key_release(self, key, modifiers):
-        """Called when the user releases a key. """
-
-        if key == arcade.key.UP:
-            self.up_pressed = False
-        elif key == arcade.key.DOWN:
-            self.down_pressed = False
-        elif key == arcade.key.LEFT:
-            self.left_pressed = False
-        elif key == arcade.key.RIGHT:
-            self.right_pressed = False
-
-
-def main():
-    """ Main function """
-    window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+def main() -> None:
+    """Main Program."""
+    window = MyGame()
     window.setup()
     arcade.run()
 

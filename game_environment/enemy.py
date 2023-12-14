@@ -7,12 +7,13 @@ nb_enemies = 10
 
 
 class EnemySprite(Sprite):
-    def __init__(self, filename, scale, agent):
+    def __init__(self, filename, scale, agent, ennemies):
         super().__init__(filename, scale, hit_box_algorithm="Simple")
         self.path = None
         self.barrier_list = None
         self.env = agent.env
         grid_size = SPRITE_SIZE
+        self.ennemies = ennemies
 
         # Calculate the playing field size. We can't generate paths outside of this.
         playing_field_left_boundary = 0
@@ -27,8 +28,11 @@ class EnemySprite(Sprite):
                                                     playing_field_right_boundary,
                                                     playing_field_bottom_boundary,
                                                     playing_field_top_boundary)
+        self.physics_engine = arcade.PhysicsEngineSimple(self,
+                                                         self.ennemies)
 
     def follow_agent(self, agent_sprite):
+        self.physics_engine.update()
         start = (self.center_x, self.center_y)
         end = (agent_sprite.center_x, agent_sprite.center_y)
 
@@ -63,11 +67,11 @@ class Enemy:
                                                                               height_random) == MAP_ENEMY2:
                 if self.map(width_random, height_random) == MAP_ENEMY:
                     enemy_sprite = EnemySprite(":resources:images/animated_characters/zombie/zombie_walk0.png",
-                                               SPRITE_SCALING * 1.3, self.agent,
+                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list
                                                )
                 else:
                     enemy_sprite = EnemySprite(":resources:images/animated_characters/robot/robot_walk0.png",
-                                               SPRITE_SCALING * 1.3, self.agent,
+                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list
                                                )
                 enemy_sprite.center_x, enemy_sprite.center_y = self.state_to_xy((height_random, width_random))
                 self.enemy_sprite_list.append(enemy_sprite)
