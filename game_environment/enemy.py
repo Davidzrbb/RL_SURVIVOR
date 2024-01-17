@@ -1,5 +1,9 @@
 import random
+import time
+
 import arcade
+import pyglet
+
 from constants import *
 from arcade.sprite import Sprite
 
@@ -57,15 +61,26 @@ class EnemySprite(Sprite):
 
 
 class Enemy:
-    def __init__(self, agent):
+    def __init__(self, window, agent):
         self.enemy_sprite_list = arcade.SpriteList()
         self.agent = agent
         self.env = agent.env
+        self.window = window
+        self.total_time = 0.0
+        self.timer_text = arcade.Text(
+            text="3",
+            start_x=window.width // 2 + 10,
+            start_y=window.height // 2 - 60,
+            color=arcade.color.RED,
+            font_size=40,
+            anchor_x="center",
+        )
         self.setup()
 
     def setup(self):
         # reset the enemy
         self.enemy_sprite_list = arcade.SpriteList()
+        self.total_time = 0.0
         count = 0
         while count < nb_enemies:
             width_random, height_random = random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1)
@@ -83,10 +98,25 @@ class Enemy:
                 self.enemy_sprite_list.append(enemy_sprite)
                 count += 1
 
+    def game_over(self):
+        if self.agent.indicator_bar.fullness <= 0:
+            arcade.draw_lrtb_rectangle_filled(0, self.window.width, self.window.height, 0, (0, 0, 0, 200))
+            arcade.draw_text("Game Over", self.window.width / 2 - 125, self.window.height / 2 + 20, arcade.color.RED, 40)
+            self.timer_text.draw()
+
     def on_draw(self):
         self.enemy_sprite_list.draw()
+        self.game_over()
 
     def on_update(self, delta_time):
+        if self.agent.indicator_bar.fullness <= 0:
+            self.total_time += delta_time
+            # Calculate seconds by using a modulus (remainder)
+            seconds = 3 - int(self.total_time) % 60
+            # Use string formatting to create a new text string for our timer
+            self.timer_text.text = f"{seconds:2d}"
+            if self.total_time > 3:
+                self.window.reload()
         for enemy in self.enemy_sprite_list:
             enemy.follow_agent(self.agent.agent_sprite)
 

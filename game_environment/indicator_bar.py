@@ -17,7 +17,6 @@ class IndicatorBar:
     ) -> None:
         self.owner = owner
         self.sprite_list: arcade.SpriteList = sprite_list
-
         self._box_width: int = width
         self._box_height: int = height
         self._half_box_width: int = self._box_width // 2
@@ -57,7 +56,8 @@ class IndicatorBar:
 
     @fullness.setter
     def fullness(self, new_fullness: float) -> None:
-        if new_fullness < 0.0:
+
+        if new_fullness < 0.0 or new_fullness == 0.0:
             new_fullness = 0.0
 
         if new_fullness != self.fullness:
