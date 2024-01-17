@@ -51,7 +51,7 @@ class Agent:
 
     def add_bullet(self):
         self.bullet_sprite = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", SPRITE_SCALING * 5)
-        self.bullet_sprite.center_x, self.bullet_sprite.center_y = self.agent_sprite.center_x, self.agent_sprite.center_y
+        self.bullet_sprite.center_x, self.bullet_sprite.center_y = self.agent_sprite.center_x + 30, self.agent_sprite.center_y
         self.bullet.append(self.bullet_sprite)
 
     def is_empty_and_adjacent(self, state):

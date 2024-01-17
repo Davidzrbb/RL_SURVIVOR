@@ -7,19 +7,21 @@ import pyglet
 from constants import *
 from arcade.sprite import Sprite
 
-nb_enemies = 10
+nb_enemies = 4
 
 
 class EnemySprite(Sprite):
     def __init__(self, filename, scale, agent, ennemies):
         super().__init__(filename, scale, hit_box_algorithm="Simple")
         self.check_hitbox = None
+        self.check_hitbox_bullet = None
         self.path = None
         self.barrier_list = None
         self.env = agent.env
         grid_size = SPRITE_SIZE
         self.ennemies = ennemies
         self.agent = agent
+
 
         # Calculate the playing field size. We can't generate paths outside of this.
         playing_field_left_boundary = 0
@@ -39,6 +41,20 @@ class EnemySprite(Sprite):
 
     def follow_agent(self, agent_sprite):
         self.check_hitbox = arcade.check_for_collision(self, agent_sprite)
+        self.check_hitbox_bullet = arcade.check_for_collision_with_list(self, self.agent.bullet)
+        # if self.check_hitbox_bullet:
+        #     self.kill()
+        #     self.agent.bullet[0].kill()
+
+        if self.check_hitbox_bullet:
+            # Iterate through the bullets and find the one that collided
+            for bullet in self.agent.bullet:
+                if arcade.check_for_collision(self, bullet):
+                    self.kill()  # Kill the enemy
+                    bullet.kill()  # Kill the specific bullet that collided # Remove the bullet from the list
+                    break
+
+
         if self.check_hitbox:
             # SI ENNEMI TOUCHE AGENT
             if random.randint(0, 100) < 10:
