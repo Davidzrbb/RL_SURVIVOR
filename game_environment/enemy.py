@@ -5,6 +5,22 @@ from constants import *
 from arcade.sprite import Sprite
 
 
+class CoinSprite(Sprite):
+    def __init__(self, filename, scale, agent, coin_sprite):
+        super().__init__(filename, scale, hit_box_algorithm="Simple")
+        self.agent = agent
+        self.coin_sprite = coin_sprite
+        self.check_hitbox_coin = None
+
+    def collect_coin(self, coin_sprite, agent_sprite):
+        self.check_hitbox_coin = arcade.check_for_collision_with_list(agent_sprite, coin_sprite)
+        if self.check_hitbox_coin:
+            # Iterate through the bullets and find the one that collided
+            for coin in coin_sprite:
+                if arcade.check_for_collision(agent_sprite, coin):
+                    coin.kill()
+
+
 class EnemySprite(Sprite):
     def __init__(self, filename, scale, agent, ennemies, enemy):
         super().__init__(filename, scale, hit_box_algorithm="Simple")
@@ -17,7 +33,6 @@ class EnemySprite(Sprite):
         self.ennemies = ennemies
         self.agent = agent
         self.enemy = enemy
-
 
         playing_field_left_boundary = 0
         playing_field_right_boundary = GRID_WIDTH * SPRITE_SIZE  # ou une valeur appropriée
@@ -118,7 +133,8 @@ class Enemy:
             self.timer_text.draw()
 
     def add_coin(self, enemy_sprite):
-        coin_sprite = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING )
+        coin_sprite = CoinSprite(":resources:images/items/coinGold.png", SPRITE_SCALING, self.agent,
+                                 self.coin_sprite_list)
         coin_sprite.center_x, coin_sprite.center_y = enemy_sprite.center_x, enemy_sprite.center_y
         self.coin_sprite_list.append(coin_sprite)
 
@@ -128,7 +144,6 @@ class Enemy:
 
         # Remove the enemy sprite from the list
         self.enemy_sprite_list.remove(enemy_sprite)
-
 
     def on_draw(self):
         self.enemy_sprite_list.draw()
@@ -146,6 +161,8 @@ class Enemy:
                 self.window.reload()
         for enemy in self.enemy_sprite_list:
             enemy.follow_agent(self.agent.agent_sprite)
+        for coin in self.coin_sprite_list:
+            coin.collect_coin(self.coin_sprite_list, self.agent.agent_sprite)
 
     def state_to_xy(self, state):
         return (state[1] + 0.5) * SPRITE_SIZE, \
