@@ -84,7 +84,7 @@ class Agent:
         # the bullet move to the end of the map and then disappear
         if self.bullet_sprite.center_x > self.window.width or self.bullet_sprite.center_y > self.window.height or \
                 self.bullet_sprite.center_x < 0 or self.bullet_sprite.center_y < 0:
-            self.bullet_sprite.remove_from_sprite_lists()
+            self.bullet_sprite.kill()
         self.total_time += delta_time
         if self.total_time > RELOAD_BULLET_TIME:
             self.add_bullet()

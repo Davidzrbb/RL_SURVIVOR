@@ -1,17 +1,12 @@
 import random
-import time
 
 import arcade
-import pyglet
-
 from constants import *
 from arcade.sprite import Sprite
 
-nb_enemies = 4
-
 
 class EnemySprite(Sprite):
-    def __init__(self, filename, scale, agent, ennemies):
+    def __init__(self, filename, scale, agent, ennemies, enemy):
         super().__init__(filename, scale, hit_box_algorithm="Simple")
         self.check_hitbox = None
         self.check_hitbox_bullet = None
@@ -21,9 +16,9 @@ class EnemySprite(Sprite):
         grid_size = SPRITE_SIZE
         self.ennemies = ennemies
         self.agent = agent
+        self.enemy = enemy
 
 
-        # Calculate the playing field size. We can't generate paths outside of this.
         playing_field_left_boundary = 0
         playing_field_right_boundary = GRID_WIDTH * SPRITE_SIZE  # ou une valeur appropriée
         playing_field_top_boundary = GRID_HEIGHT * SPRITE_SIZE  # ou une valeur appropriée
@@ -42,18 +37,16 @@ class EnemySprite(Sprite):
     def follow_agent(self, agent_sprite):
         self.check_hitbox = arcade.check_for_collision(self, agent_sprite)
         self.check_hitbox_bullet = arcade.check_for_collision_with_list(self, self.agent.bullet)
-        # if self.check_hitbox_bullet:
-        #     self.kill()
-        #     self.agent.bullet[0].kill()
 
         if self.check_hitbox_bullet:
             # Iterate through the bullets and find the one that collided
             for bullet in self.agent.bullet:
                 if arcade.check_for_collision(self, bullet):
+                    enemy_sprite = self
+                    enemy_sprite.enemy.add_coin(enemy_sprite)  # Use the 'enemy' attribute to access the Enemy instance
                     self.kill()  # Kill the enemy
-                    bullet.kill()  # Kill the specific bullet that collided # Remove the bullet from the list
+                    bullet.kill()  # Kill the specific bullet that collided
                     break
-
 
         if self.check_hitbox:
             # SI ENNEMI TOUCHE AGENT
@@ -78,11 +71,13 @@ class EnemySprite(Sprite):
 
 class Enemy:
     def __init__(self, window, agent):
+        self.coin_sprite_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
         self.agent = agent
         self.env = agent.env
         self.window = window
         self.total_time = 0.0
+        self.killed_enemy_positions = []
         self.timer_text = arcade.Text(
             text="3",
             start_x=window.width // 2 + 10,
@@ -96,19 +91,20 @@ class Enemy:
     def setup(self):
         # reset the enemy
         self.enemy_sprite_list = arcade.SpriteList()
+        self.coin_sprite_list = arcade.SpriteList()
         self.total_time = 0.0
         count = 0
-        while count < nb_enemies:
+        while count < NB_ENEMIES:
             width_random, height_random = random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1)
             if self.map(width_random, height_random) == MAP_ENEMY or self.map(width_random,
                                                                               height_random) == MAP_ENEMY2:
                 if self.map(width_random, height_random) == MAP_ENEMY:
                     enemy_sprite = EnemySprite(":resources:images/animated_characters/zombie/zombie_walk0.png",
-                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list
+                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list, self
                                                )
                 else:
                     enemy_sprite = EnemySprite(":resources:images/animated_characters/robot/robot_walk0.png",
-                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list
+                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list, self
                                                )
                 enemy_sprite.center_x, enemy_sprite.center_y = self.state_to_xy((height_random, width_random))
                 self.enemy_sprite_list.append(enemy_sprite)
@@ -117,11 +113,26 @@ class Enemy:
     def game_over(self):
         if self.agent.indicator_bar.fullness <= 0:
             arcade.draw_lrtb_rectangle_filled(0, self.window.width, self.window.height, 0, (0, 0, 0, 200))
-            arcade.draw_text("Game Over", self.window.width / 2 - 125, self.window.height / 2 + 20, arcade.color.RED, 40)
+            arcade.draw_text("Game Over", self.window.width / 2 - 125, self.window.height / 2 + 20, arcade.color.RED,
+                             40)
             self.timer_text.draw()
+
+    def add_coin(self, enemy_sprite):
+        coin_sprite = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING )
+        coin_sprite.center_x, coin_sprite.center_y = enemy_sprite.center_x, enemy_sprite.center_y
+        self.coin_sprite_list.append(coin_sprite)
+
+        # Store the position of the killed enemy
+        position = (enemy_sprite.center_y // SPRITE_SIZE, enemy_sprite.center_x // SPRITE_SIZE)
+        self.killed_enemy_positions.append(position)
+
+        # Remove the enemy sprite from the list
+        self.enemy_sprite_list.remove(enemy_sprite)
+
 
     def on_draw(self):
         self.enemy_sprite_list.draw()
+        self.coin_sprite_list.draw()
         self.game_over()
 
     def on_update(self, delta_time):
