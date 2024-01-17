@@ -4,10 +4,12 @@ from constants import *
 import random
 
 from game_environment.indicator_bar import IndicatorBar
+from game_environment.indicator_xp_bar import IndicatorXPBar
 
 
 class Agent:
     def __init__(self, window, env):
+        self.indicator_xp_bar = None
         self.agent_sprite = None
         self.bullet_sprite = None
         self.agent = None
@@ -35,6 +37,17 @@ class Agent:
             height=4,
             border_size=4,
         )
+        self.indicator_xp_bar = IndicatorXPBar(
+            owner=self,
+            sprite_list=self.bar_list,
+            position=(0, 0),
+            full_color=arcade.color.AZURE,
+            background_color=arcade.color.BLACK,
+            width=100,
+            height=4,
+            border_size=4,
+        )
+        self.indicator_xp_bar.fullness = 0.01
         self.agent_sprite = arcade.Sprite(
             ":resources:images/animated_characters/male_adventurer/maleAdventurer_walk0.png", SPRITE_SCALING * 1.5)
 
@@ -78,15 +91,18 @@ class Agent:
         self.agent.draw()
         self.bullet.draw()
         self.indicator_bar.bar_list.draw()
+        self.indicator_xp_bar.draw_level_indicator()
+        self.indicator_xp_bar.bar_list.draw()
 
     def update(self, delta_time):
-        self.indicator_bar.position = self.agent_sprite.center_x, self.agent_sprite.center_y + 25
+        self.indicator_bar.position = self.agent_sprite.center_x, self.agent_sprite.center_y + 35
+        self.indicator_xp_bar.position = self.agent_sprite.center_x, self.agent_sprite.center_y + 25
         # the bullet move to the end of the map and then disappear
         if self.bullet_sprite.center_x > self.window.width or self.bullet_sprite.center_y > self.window.height or \
                 self.bullet_sprite.center_x < 0 or self.bullet_sprite.center_y < 0:
             self.bullet_sprite.kill()
         self.total_time += delta_time
-        if self.total_time > RELOAD_BULLET_TIME:
+        if self.total_time > get_bullet_time():
             self.add_bullet()
             self.total_time = 0.0
 

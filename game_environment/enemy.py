@@ -4,8 +4,12 @@ import arcade
 from constants import *
 from arcade.sprite import Sprite
 
+global count_kill  # Use this variable to count the number of enemies killed
+count_kill = 0
+
 
 class CoinSprite(Sprite):
+
     def __init__(self, filename, scale, agent, coin_sprite):
         super().__init__(filename, scale, hit_box_algorithm="Simple")
         self.agent = agent
@@ -18,6 +22,11 @@ class CoinSprite(Sprite):
             # Iterate through the bullets and find the one that collided
             for coin in coin_sprite:
                 if arcade.check_for_collision(agent_sprite, coin):
+                    self.agent.indicator_xp_bar.fullness += 0.2
+                    if self.agent.indicator_xp_bar.fullness >= 1:
+                        self.agent.indicator_xp_bar.fullness = 0.1
+                        self.agent.indicator_xp_bar.level += 1
+                        set_bullet_time(get_bullet_time() - 0.5)
                     coin.kill()
 
 
@@ -50,6 +59,7 @@ class EnemySprite(Sprite):
                                                          self.ennemies)
 
     def follow_agent(self, agent_sprite):
+        global count_kill
         self.check_hitbox = arcade.check_for_collision(self, agent_sprite)
         self.check_hitbox_bullet = arcade.check_for_collision_with_list(self, self.agent.bullet)
 
@@ -57,8 +67,13 @@ class EnemySprite(Sprite):
             # Iterate through the bullets and find the one that collided
             for bullet in self.agent.bullet:
                 if arcade.check_for_collision(self, bullet):
+                    count_kill += 1
                     enemy_sprite = self
                     enemy_sprite.enemy.add_coin(enemy_sprite)  # Use the 'enemy' attribute to access the Enemy instance
+                    if count_kill == get_nb_enemies():
+                        set_nb_enemies(get_nb_enemies() + 2)
+                        count_kill = 0
+                        self.enemy.setup()
                     self.kill()  # Kill the enemy
                     bullet.kill()  # Kill the specific bullet that collided
                     break
@@ -106,10 +121,9 @@ class Enemy:
     def setup(self):
         # reset the enemy
         self.enemy_sprite_list = arcade.SpriteList()
-        self.coin_sprite_list = arcade.SpriteList()
         self.total_time = 0.0
         count = 0
-        while count < NB_ENEMIES:
+        while count < get_nb_enemies():
             width_random, height_random = random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1)
             if self.map(width_random, height_random) == MAP_ENEMY or self.map(width_random,
                                                                               height_random) == MAP_ENEMY2:
@@ -126,7 +140,12 @@ class Enemy:
                 count += 1
 
     def game_over(self):
+        global count_kill
         if self.agent.indicator_bar.fullness <= 0:
+            self.coin_sprite_list = arcade.SpriteList()
+            count_kill = 0
+            set_nb_enemies(5)
+            set_bullet_time(3)
             arcade.draw_lrtb_rectangle_filled(0, self.window.width, self.window.height, 0, (0, 0, 0, 200))
             arcade.draw_text("Game Over", self.window.width / 2 - 125, self.window.height / 2 + 20, arcade.color.RED,
                              40)
