@@ -24,8 +24,19 @@ MAP_EMPTY = 'E'  # Empty
 MAP_AGENT = 'A'  # Agent
 MAP_ENEMY = 'EN1'  # Enemy
 MAP_ENEMY2 = 'EN2'  # Enemy
+MAP_XP = 'XP'  # XP
 
+ACTION_UP, ACTION_DOWN, ACTION_LEFT, ACTION_RIGHT = 'U', 'D', 'L', 'R'
+ACTIONS = [ACTION_UP, ACTION_DOWN, ACTION_LEFT, ACTION_RIGHT]
 
+MOVES = {ACTION_UP: (-1, 0),
+         ACTION_DOWN: (1, 0),
+         ACTION_LEFT: (0, -1),
+         ACTION_RIGHT: (0, 1)}
+
+REWARD_WALL = -128
+REWARD_DEFAULT = -1
+REWARD_GOAL = 64
 def set_nb_enemies(value):
     global NB_ENEMIES
     NB_ENEMIES = value
