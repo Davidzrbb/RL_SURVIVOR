@@ -3,6 +3,7 @@ from constants import *
 from game_environment.enemy import Enemy
 from game_environment.map import Environment
 from rl.agent import Agent
+from rl.rl_agent import ReinforcementLearning
 
 
 class MyWindow(arcade.Window):
@@ -11,6 +12,8 @@ class MyWindow(arcade.Window):
         self.environment = Environment(self)
         self.agent = Agent(self, self.environment)
         self.enemy = Enemy(self, self.agent)
+        self.rl = ReinforcementLearning(self.environment, self.agent, self.enemy.rl)
+        self.rl.load(AGENT_FILE)
 
     def on_draw(self):
         arcade.start_render()
@@ -22,9 +25,9 @@ class MyWindow(arcade.Window):
         self.enemy.on_update(delta_time)
         self.agent.update(delta_time)
 
-    def on_mouse_motion(self, x, y, dx, dy):
-        self.agent.agent_sprite.center_x = x
-        self.agent.agent_sprite.center_y = y
+    # def on_mouse_motion(self, x, y, dx, dy):
+    #     self.agent.agent_sprite.center_x = x
+    #     self.agent.agent_sprite.center_y = y
 
     # if press R, reset the ennemy
     def on_key_press(self, key, modifiers):

@@ -49,14 +49,14 @@ class IndicatorXPBar:
     def draw_level_indicator(self):
         # Draw the level text inside the level box
         arcade.draw_text(
-            f"{self._level}",
-            self._center_x - self._half_box_width - self._level_box_size,
-            self._center_y + self._level_box_size // 2,
-            self._level_text_color,
+            text=f"{self._level}",
+            start_x=self._center_x - self._half_box_width - self._level_box_size,
+            start_y=self._center_y + self._level_box_size // 2,
+
+            color=self._level_text_color,
             font_size=10,
             anchor_x="center",
             anchor_y="center",
-
         )
 
     @property

@@ -53,7 +53,7 @@ class Environment:
         self.wall_T_list = None
         self.player_sprite = None
         self.obstacle_list = None
-        
+
         self.setup()
 
     def setup(self):

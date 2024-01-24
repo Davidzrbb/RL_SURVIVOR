@@ -38,6 +38,8 @@ REWARD_WALL = -128
 REWARD_DEFAULT = -1
 REWARD_GOAL = 64
 
+AGENT_FILE = 'survivor.qtable'
+
 
 def set_nb_enemies(value):
     global NB_ENEMIES

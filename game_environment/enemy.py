@@ -5,6 +5,8 @@ import arcade
 from constants import *
 from arcade.sprite import Sprite
 
+from rl.rl_agent import ReinforcementLearning
+
 global count_kill  # Use this variable to count the number of enemies killed
 count_kill = 0
 
@@ -15,6 +17,7 @@ class ReinforcementLearningEnnemies:
         self.env = agent.env
         self.map_agent = copy.deepcopy(self.env.map_object)
         self.stack_map_tab = {}
+        self.rl = ReinforcementLearning(self.env, self.agent, self, learning_rate=1, discount_factor=0.9)
 
     def modify_map(self, state, value):
         self.map_agent[state] = value
@@ -32,6 +35,10 @@ class ReinforcementLearningEnnemies:
 
     def get_map(self):
         return self.map_agent
+
+    def do(self):
+        action, reward = self.rl.do1()
+        self.rl.update_player()
 
 
 class CoinSprite(Sprite):
@@ -214,6 +221,8 @@ class Enemy:
             enemy.follow_agent(self.agent.agent_sprite)
         for coin in self.coin_sprite_list:
             coin.collect_coin(self.coin_sprite_list, self.agent.agent_sprite, self)
+
+        self.rl.do()
 
     def state_to_xy(self, state):
         return (state[1] + 0.5) * SPRITE_SIZE, \

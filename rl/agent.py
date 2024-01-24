@@ -9,8 +9,13 @@ from game_environment.indicator_xp_bar import IndicatorXPBar
 
 class Agent:
     def __init__(self, window, env):
+        self.radar_list = None
+        self.neighbors_average = []
+        self.neighbors_far = []
+        self.neighbors_close = []
         self.indicator_xp_bar = None
         self.agent_sprite = None
+        self.radar_sprite = None
         self.bullet_sprite = None
         self.agent = None
         self.bullet = None
@@ -27,6 +32,7 @@ class Agent:
         self.total_time = 0.0
         self.bullet = arcade.SpriteList()
         self.bar_list = arcade.SpriteList()
+        self.radar_list = arcade.SpriteList()
         self.indicator_bar = IndicatorBar(
             owner=self,
             sprite_list=self.bar_list,
@@ -47,6 +53,7 @@ class Agent:
             height=4,
             border_size=4,
         )
+
         self.indicator_xp_bar.fullness = 0.01
         self.agent_sprite = arcade.Sprite(
             ":resources:images/animated_characters/male_adventurer/maleAdventurer_walk0.png", SPRITE_SCALING * 1.5)
@@ -61,6 +68,34 @@ class Agent:
 
         self.agent.append(self.agent_sprite)
         self.add_bullet()
+
+        for i in range(-3, 4):
+            for j in range(-7, 8):
+                if j <= -4 or j >= 4:
+                    self.neighbors_far.append((i, j))
+        for i in range(-7, 8):
+            for j in range(-3, 4):
+                if i <= -5 or i >= 5:
+                    self.neighbors_far.append((i, j))
+        self.neighbors_average = []
+        for i in range(-3, 4):
+            for j in range(-3, 4):
+                if i != 0 and j != 0:
+                    self.neighbors_average.append((i, j))
+        count = 0
+        self.neighbors_close = [(self.agent_sprite.center_x, self.agent_sprite.center_y),
+                                (self.agent_sprite.center_x, self.agent_sprite.center_y),
+                                (self.agent_sprite.center_x, self.agent_sprite.center_y),
+                                (self.agent_sprite.center_x, self.agent_sprite.center_y)]
+        while count < len(self.neighbors_close):
+            self.radar_sprite = arcade.Sprite(":resources:images/tiles/lava.png", SPRITE_SCALING)
+            self.radar_list.append(self.radar_sprite)
+            count += 1
+        count = 0
+        while count < len(self.neighbors_average):
+            self.radar_sprite = arcade.Sprite(":resources:images/tiles/lava.png", SPRITE_SCALING)
+            self.radar_list.append(self.radar_sprite)
+            count += 1
 
     def add_bullet(self):
         self.bullet_sprite = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png", SPRITE_SCALING * 5)
@@ -91,8 +126,9 @@ class Agent:
         self.agent.draw()
         self.bullet.draw()
         self.indicator_bar.bar_list.draw()
-        self.indicator_xp_bar.draw_level_indicator()
+        # self.indicator_xp_bar.draw_level_indicator()
         self.indicator_xp_bar.bar_list.draw()
+        self.radar_list.draw()
 
     def update(self, delta_time):
         self.indicator_bar.position = self.agent_sprite.center_x, self.agent_sprite.center_y + 35
@@ -108,6 +144,30 @@ class Agent:
 
         for bullet in self.bullet:
             bullet.center_x += BULLET_SPEED
+        for radar in range(len(self.radar_list)):
+            if radar == 0:
+                self.radar_list[radar].center_x, self.radar_list[
+                    radar].center_y = self.agent_sprite.center_x - self.agent_sprite.height, \
+                    self.agent_sprite.center_y
+            elif radar == 1:
+                self.radar_list[radar].center_x, self.radar_list[
+                    radar].center_y = self.agent_sprite.center_x + self.agent_sprite.height, \
+                    self.agent_sprite.center_y
+            elif radar == 2:
+                self.radar_list[radar].center_x, self.radar_list[radar].center_y = self.agent_sprite.center_x, \
+                    self.agent_sprite.center_y - self.agent_sprite.height
+            elif radar == 3:
+                self.radar_list[radar].center_x, self.radar_list[radar].center_y = self.agent_sprite.center_x, \
+                    self.agent_sprite.center_y + self.agent_sprite.height
+            elif radar >= 4:
+                self.radar_list[radar].center_x, self.radar_list[radar].center_y = self.agent_sprite.center_x + \
+                                                                                   self.neighbors_average[
+                                                                                       radar - 5][
+                                                                                       0] * self.agent_sprite.height, \
+                                                                                   self.agent_sprite.center_y + \
+                                                                                   self.neighbors_average[
+                                                                                       radar - 5][
+                                                                                       1] * self.agent_sprite.height
 
     def state_to_xy(self, state):
         return (state[1] + 0.5) * SPRITE_SIZE, \

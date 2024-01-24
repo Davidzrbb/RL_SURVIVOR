@@ -1,3 +1,6 @@
+import pickle
+from os.path import exists
+
 from constants import *
 from random import *
 
@@ -28,9 +31,7 @@ class ReinforcementLearning:
         self.map = rl.get_map()
         self.goal = rl.stack_map_tab
         self.neighbors_far = []
-        self.reset()
         self.qtable = {}
-        self.add_state(self.state)
 
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
@@ -51,12 +52,33 @@ class ReinforcementLearning:
                 if i != 0 and j != 0:
                     self.neighbors_average.append((i, j))
 
+        self.reset()
+        self.add_state(self.state)
+
     def is_not_allowed(self, position):
         # si pas dans la map ou si pas vide ou si pas xp
         # si True, on ne peut pas aller dans cette direction
         # si False, on peut aller dans cette direction
-        return position not in self.map \
-            or self.map[position] not in [MAP_EMPTY, MAP_XP]
+        if position not in self.map:
+            return True
+        if (position[0] + 1, position[1]) not in self.map:
+            return True
+        if (position[0] - 1, position[1]) not in self.map:
+            return True
+        if (position[0], position[1] + 1) not in self.map:
+            return True
+        if (position[0], position[1] - 1) not in self.map:
+            return True
+        if self.map[position[0] + 1, position[1]] != MAP_EMPTY and self.map[position[0] + 1, position[1]] != MAP_XP:
+            return True
+        if self.map[position[0] - 1, position[1]] != MAP_EMPTY and self.map[position[0] - 1, position[1]] != MAP_XP:
+            return True
+        if self.map[position[0], position[1] + 1] != MAP_EMPTY and self.map[position[0], position[1] + 1] != MAP_XP:
+            return True
+        if self.map[position[0], position[1] - 1] != MAP_EMPTY and self.map[position[0], position[1] - 1] != MAP_XP:
+            return True
+
+        return False
 
     def get_radar(self, state):
         # position de l'agent
@@ -83,27 +105,24 @@ class ReinforcementLearning:
                 else:
                     # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
                     radar.append(MAP_WALL)
+        radar_goal = [0] * 9
         if len(self.goal) != 0:
+            # (1 - 0) = 1  + 1 = 2
             delta_row = sign(list(self.goal.keys())[0][0] - row) + 1
+            # (2 - 0) = 1 + 1 = 2
             delta_col = sign(list(self.goal.keys())[0][1] - col) + 1
-            radar_goal = [0] * 9
-
-            position = delta_row * 3 + delta_col
-            radar_goal[position] = 1
-
-            return tuple(radar + radar_goal)
-
-        return radar
+            position = delta_row * 3 + delta_col  # 2 * 3 + 2 = 8
+            radar_goal[position] = 1  # radar_goal[8] = 1
+        return tuple(radar + radar_goal)
 
     def do(self, position, action):
         move = MOVES[action]
         new_position = (position[0] + move[0], position[1] + move[1])
-
         if self.is_not_allowed(new_position):
             reward = REWARD_WALL
         else:
             position = new_position
-            if new_position in self.goal:
+            if position in self.goal:
                 reward = REWARD_GOAL
             else:
                 reward = REWARD_DEFAULT
@@ -111,7 +130,8 @@ class ReinforcementLearning:
         return self.get_radar(position), position, reward
 
     def reset(self):
-        self.position = self.agent.start
+        self.position = self.agent.agent_sprite.center_x // SPRITE_SIZE, \
+                        self.agent.agent_sprite.center_y // SPRITE_SIZE
         self.score = 0
         self.iteration = 0
         self.state = self.get_radar(self.position)
@@ -122,7 +142,11 @@ class ReinforcementLearning:
         if random() < self.noise:
             return choice(ACTIONS)
         else:
-            return arg_max(self.qtable[self.state])
+            if self.state in self.qtable:
+                return arg_max(self.qtable[self.state])
+            else:
+                # Handle missing key
+                return choice(ACTIONS)
 
     def add_state(self, state):
         if state not in self.qtable:
@@ -136,7 +160,6 @@ class ReinforcementLearning:
         self.score += reward
         self.iteration += 1
         self.position = position
-
         # Q-learning
         self.add_state(new_state)
         maxQ = max(self.qtable[new_state].values())
@@ -144,9 +167,22 @@ class ReinforcementLearning:
                                       - self.qtable[self.state][action])
         self.qtable[self.state][action] += delta
         self.state = new_state
-
         # if self.position == self.goal:
         #     self.history.append(self.score)
         #     self.noise *= 1 - 1E-1
 
         return action, reward
+
+    def load(self, filename):
+        if exists(filename):
+            with open(filename, 'rb') as file:
+                self.qtable = pickle.load(file)
+            self.reset()
+
+    def save(self, filename):
+        with open(filename, 'wb') as file:
+            pickle.dump(self.qtable, file)
+
+    def update_player(self):
+        self.agent.agent_sprite.center_x, self.agent.agent_sprite.center_y = self.position[0] * SPRITE_SIZE, \
+                                                                             self.position[1] * SPRITE_SIZE
