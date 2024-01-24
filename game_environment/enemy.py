@@ -1,3 +1,4 @@
+import copy
 import random
 
 import arcade
@@ -8,6 +9,31 @@ global count_kill  # Use this variable to count the number of enemies killed
 count_kill = 0
 
 
+class ReinforcementLearningEnnemies:
+    def __init__(self, agent):
+        self.agent = agent
+        self.env = agent.env
+        self.map_agent = copy.deepcopy(self.env.map_object)
+        self.stack_map_tab = {}
+
+    def modify_map(self, state, value):
+        self.map_agent[state] = value
+
+    def remove_from_stack_map(self, state):
+        if state in self.stack_map_tab:
+            self.stack_map_tab.pop(state)
+            self.map_agent[state] = self.env.map_object[state]
+
+    def stack_map(self, state, value):
+        if state not in self.stack_map_tab:
+            self.stack_map_tab[state] = value
+        for state in self.stack_map_tab:
+            self.map_agent[state] = self.stack_map_tab[state]
+
+    def get_map(self):
+        return self.map_agent
+
+
 class CoinSprite(Sprite):
 
     def __init__(self, filename, scale, agent, coin_sprite):
@@ -16,7 +42,7 @@ class CoinSprite(Sprite):
         self.coin_sprite = coin_sprite
         self.check_hitbox_coin = None
 
-    def collect_coin(self, coin_sprite, agent_sprite):
+    def collect_coin(self, coin_sprite, agent_sprite, enemy):
         self.check_hitbox_coin = arcade.check_for_collision_with_list(agent_sprite, coin_sprite)
         if self.check_hitbox_coin:
             # Iterate through the bullets and find the one that collided
@@ -27,6 +53,7 @@ class CoinSprite(Sprite):
                         self.agent.indicator_xp_bar.fullness = 0.1
                         self.agent.indicator_xp_bar.level += 1
                         set_bullet_time(get_bullet_time() - 0.5)
+                    enemy.rl.remove_from_stack_map((coin.center_y // SPRITE_SIZE, coin.center_x // SPRITE_SIZE))
                     coin.kill()
 
 
@@ -70,6 +97,7 @@ class EnemySprite(Sprite):
                     count_kill += 1
                     enemy_sprite = self
                     enemy_sprite.enemy.add_coin(enemy_sprite)  # Use the 'enemy' attribute to access the Enemy instance
+                    self.enemy.rl.stack_map((self.center_y // SPRITE_SIZE, self.center_x // SPRITE_SIZE), MAP_XP)
                     if count_kill == get_nb_enemies():
                         set_nb_enemies(get_nb_enemies() + 2)
                         count_kill = 0
@@ -97,12 +125,16 @@ class EnemySprite(Sprite):
                 self.center_x += min(SPRITE_SPEED, self.path[1][0] - self.center_x)
             elif self.center_x > self.path[1][0]:
                 self.center_x -= min(SPRITE_SPEED, self.center_x - self.path[1][0])
+            state = (self.center_y // SPRITE_SIZE, self.center_x // SPRITE_SIZE)
+            self.enemy.rl.modify_map(state, MAP_ENEMY)
+            # ReinforcementLearningEnnemies(self.agent).modify_map(state, MAP_ENEMY)
 
 
 class Enemy:
     def __init__(self, window, agent):
         self.coin_sprite_list = arcade.SpriteList()
         self.enemy_sprite_list = arcade.SpriteList()
+        self.rl = ReinforcementLearningEnnemies(agent)
         self.agent = agent
         self.env = agent.env
         self.window = window
@@ -181,7 +213,7 @@ class Enemy:
         for enemy in self.enemy_sprite_list:
             enemy.follow_agent(self.agent.agent_sprite)
         for coin in self.coin_sprite_list:
-            coin.collect_coin(self.coin_sprite_list, self.agent.agent_sprite)
+            coin.collect_coin(self.coin_sprite_list, self.agent.agent_sprite, self)
 
     def state_to_xy(self, state):
         return (state[1] + 0.5) * SPRITE_SIZE, \
