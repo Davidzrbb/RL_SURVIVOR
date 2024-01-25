@@ -123,6 +123,7 @@ class EnemySprite(Sprite):
         self.path = arcade.astar_calculate_path(start, end, self.barrier_list,
                                                 diagonal_movement=True)
         if self.path and len(self.path) > 1:
+            self.enemy.rl.modify_map((self.center_y // SPRITE_SIZE, self.center_x // SPRITE_SIZE), MAP_EMPTY)
             if self.center_y < self.path[1][1]:
                 self.center_y += min(SPRITE_SPEED, self.path[1][1] - self.center_y)
             elif self.center_y > self.path[1][1]:
@@ -134,7 +135,6 @@ class EnemySprite(Sprite):
                 self.center_x -= min(SPRITE_SPEED, self.center_x - self.path[1][0])
             state = (self.center_y // SPRITE_SIZE, self.center_x // SPRITE_SIZE)
             self.enemy.rl.modify_map(state, MAP_ENEMY)
-            # ReinforcementLearningEnnemies(self.agent).modify_map(state, MAP_ENEMY)
 
 
 class Enemy:
@@ -168,11 +168,11 @@ class Enemy:
                                                                               height_random) == MAP_ENEMY2:
                 if self.map(width_random, height_random) == MAP_ENEMY:
                     enemy_sprite = EnemySprite(":resources:images/animated_characters/zombie/zombie_walk0.png",
-                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list, self
+                                               SPRITE_SCALING, self.agent, self.enemy_sprite_list, self
                                                )
                 else:
                     enemy_sprite = EnemySprite(":resources:images/animated_characters/robot/robot_walk0.png",
-                                               SPRITE_SCALING * 1.3, self.agent, self.enemy_sprite_list, self
+                                               SPRITE_SCALING, self.agent, self.enemy_sprite_list, self
                                                )
                 enemy_sprite.center_x, enemy_sprite.center_y = self.state_to_xy((height_random, width_random))
                 self.enemy_sprite_list.append(enemy_sprite)
@@ -183,7 +183,7 @@ class Enemy:
         if self.agent.indicator_bar.fullness <= 0:
             self.coin_sprite_list = arcade.SpriteList()
             count_kill = 0
-            set_nb_enemies(5)
+            set_nb_enemies(2)
             set_bullet_time(3)
             arcade.draw_lrtb_rectangle_filled(0, self.window.width, self.window.height, 0, (0, 0, 0, 200))
             arcade.draw_text("Game Over", self.window.width / 2 - 125, self.window.height / 2 + 20, arcade.color.RED,

@@ -22,15 +22,13 @@ class ReinforcementLearning:
         self.state = None
         self.iteration = None
         self.score = None
-        self.position = (agent.agent_sprite.center_x //
-                         SPRITE_SIZE, agent.agent_sprite.center_y // SPRITE_SIZE)
         row, col = 0, 0
         self.env = env
         self.agent = agent
+        self.position = (1, 1)
         self.rl = rl
         self.map = rl.get_map()
         self.goal = rl.stack_map_tab
-        self.neighbors_far = []
         self.qtable = {}
 
         self.learning_rate = learning_rate
@@ -38,14 +36,6 @@ class ReinforcementLearning:
         self.history = []
         self.noise = 0
 
-        for i in range(-3, 4):
-            for j in range(-7, 8):
-                if j <= -4 or j >= 4:
-                    self.neighbors_far.append((i, j))
-        for i in range(-7, 8):
-            for j in range(-3, 4):
-                if i <= -5 or i >= 5:
-                    self.neighbors_far.append((i, j))
         self.neighbors_average = []
         for i in range(-3, 4):
             for j in range(-3, 4):
@@ -61,21 +51,7 @@ class ReinforcementLearning:
         # si False, on peut aller dans cette direction
         if position not in self.map:
             return True
-        if (position[0] + 1, position[1]) not in self.map:
-            return True
-        if (position[0] - 1, position[1]) not in self.map:
-            return True
-        if (position[0], position[1] + 1) not in self.map:
-            return True
-        if (position[0], position[1] - 1) not in self.map:
-            return True
-        if self.map[position[0] + 1, position[1]] != MAP_EMPTY and self.map[position[0] + 1, position[1]] != MAP_XP:
-            return True
-        if self.map[position[0] - 1, position[1]] != MAP_EMPTY and self.map[position[0] - 1, position[1]] != MAP_XP:
-            return True
-        if self.map[position[0], position[1] + 1] != MAP_EMPTY and self.map[position[0], position[1] + 1] != MAP_XP:
-            return True
-        if self.map[position[0], position[1] - 1] != MAP_EMPTY and self.map[position[0], position[1] - 1] != MAP_XP:
+        if self.map[position] not in [MAP_EMPTY, MAP_XP]:
             return True
 
         return False
@@ -85,16 +61,13 @@ class ReinforcementLearning:
         row, col = state[0], state[1]
         neighbors_close = []
         neighbors_average = []
-        neighbors_far = []
 
         self.neighbors_close = [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
         for n in self.neighbors_average:
             neighbors_average.append((row + n[0], col + n[1]))
-        for n in self.neighbors_far:
-            neighbors_far.append((row + n[0], col + n[1]))
 
         radar = []
-        neighbor_categories = [neighbors_far, neighbors_average, neighbors_close]
+        neighbor_categories = [neighbors_average, neighbors_close]
         self.map = self.rl.get_map()
         self.goal = self.rl.stack_map_tab
         for category in neighbor_categories:
@@ -130,8 +103,7 @@ class ReinforcementLearning:
         return self.get_radar(position), position, reward
 
     def reset(self):
-        self.position = self.agent.agent_sprite.center_x // SPRITE_SIZE, \
-                        self.agent.agent_sprite.center_y // SPRITE_SIZE
+        self.position = (1, 1)
         self.score = 0
         self.iteration = 0
         self.state = self.get_radar(self.position)
@@ -183,6 +155,9 @@ class ReinforcementLearning:
         with open(filename, 'wb') as file:
             pickle.dump(self.qtable, file)
 
+    def state_to_xy(self, state):
+        return (state[1] + 0.5) * SPRITE_SIZE, \
+               (GRID_HEIGHT - state[0] - 0.5) * SPRITE_SIZE
+
     def update_player(self):
-        self.agent.agent_sprite.center_x, self.agent.agent_sprite.center_y = self.position[0] * SPRITE_SIZE, \
-                                                                             self.position[1] * SPRITE_SIZE
+        self.agent.agent_sprite.center_x, self.agent.agent_sprite.center_y = self.state_to_xy(self.position)
