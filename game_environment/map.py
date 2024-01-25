@@ -118,11 +118,11 @@ class Environment:
                     obstacle_sprite = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", SPRITE_SCALING,
                                                     hit_box_algorithm="Detailed")
                 elif self.map(state) == MAP_OBSTACLE2:
-                    obstacle_sprite = arcade.Sprite(":resources:images/topdown_tanks/treeGreen_large.png",
-                                                    SPRITE_SCALING * 2, hit_box_algorithm="Detailed")
+                    obstacle_sprite = arcade.Sprite(":resources:images/tiles/rock.png",
+                                                    SPRITE_SCALING, hit_box_algorithm="Detailed")
                 else:
-                    obstacle_sprite = arcade.Sprite(":resources:images/space_shooter/meteorGrey_med2.png",
-                                                    SPRITE_SCALING * 2, hit_box_algorithm="Detailed")
+                    obstacle_sprite = arcade.Sprite(":resources:images/tiles/cactus.png",
+                                                    SPRITE_SCALING, hit_box_algorithm="Detailed")
 
                 background_sprite = arcade.Sprite(":resources:images/topdown_tanks/tileGrass1.png",
                                                   SPRITE_SCALING * 2, hit_box_algorithm="Detailed")
