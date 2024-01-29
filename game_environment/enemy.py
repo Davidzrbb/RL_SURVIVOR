@@ -123,6 +123,7 @@ class EnemySprite(Sprite):
         self.path = arcade.astar_calculate_path(start, end, self.barrier_list,
                                                 diagonal_movement=True)
         if self.path and len(self.path) > 1:
+            self.enemy.rl.modify_map((self.center_y // SPRITE_SIZE, self.center_x // SPRITE_SIZE), MAP_EMPTY)
             if self.center_y < self.path[1][1]:
                 self.center_y += min(SPRITE_SPEED, self.path[1][1] - self.center_y)
             elif self.center_y > self.path[1][1]:
@@ -134,7 +135,6 @@ class EnemySprite(Sprite):
                 self.center_x -= min(SPRITE_SPEED, self.center_x - self.path[1][0])
             state = (self.center_y // SPRITE_SIZE, self.center_x // SPRITE_SIZE)
             self.enemy.rl.modify_map(state, MAP_ENEMY)
-            # ReinforcementLearningEnnemies(self.agent).modify_map(state, MAP_ENEMY)
 
 
 class Enemy:
