@@ -29,7 +29,6 @@ class ReinforcementLearning:
         self.rl = rl
         self.map = rl.get_map()
         self.goal = rl.stack_map_tab
-        self.neighbors_far = []
         self.qtable = {}
 
         self.learning_rate = learning_rate
@@ -37,14 +36,6 @@ class ReinforcementLearning:
         self.history = []
         self.noise = 0
 
-        for i in range(-3, 4):
-            for j in range(-7, 8):
-                if j <= -4 or j >= 4:
-                    self.neighbors_far.append((i, j))
-        for i in range(-7, 8):
-            for j in range(-3, 4):
-                if i <= -5 or i >= 5:
-                    self.neighbors_far.append((i, j))
         self.neighbors_average = []
         for i in range(-3, 4):
             for j in range(-3, 4):
@@ -70,16 +61,13 @@ class ReinforcementLearning:
         row, col = state[0], state[1]
         neighbors_close = []
         neighbors_average = []
-        neighbors_far = []
 
         self.neighbors_close = [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
         for n in self.neighbors_average:
             neighbors_average.append((row + n[0], col + n[1]))
-        for n in self.neighbors_far:
-            neighbors_far.append((row + n[0], col + n[1]))
 
         radar = []
-        neighbor_categories = [neighbors_far, neighbors_average, neighbors_close]
+        neighbor_categories = [neighbors_average, neighbors_close]
         self.map = self.rl.get_map()
         self.goal = self.rl.stack_map_tab
         for category in neighbor_categories:
