@@ -22,8 +22,7 @@ MAP_OBSTACLE2 = 'O2'  # Obstacle
 MAP_OBSTACLE3 = 'O3'  # Obstacle
 MAP_EMPTY = 'E'  # Empty
 MAP_AGENT = 'A'  # Agent
-MAP_ENEMY = 'EN1'  # Enemy
-MAP_ENEMY2 = 'EN2'  # Enemy
+MAP_ENEMY = 'EN'  # Enemy
 MAP_XP = 'XP'  # XP
 MAP_BULLET = 'B' # Bullet
 

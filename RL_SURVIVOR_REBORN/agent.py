@@ -9,7 +9,7 @@ class Agent:
     def __init__(self):
         self.agent_sprite = None
         self.agent_list = arcade.SpriteList()
-        self.state = (1,1)
+        self.state = (5,2)
 
         self.setup()
         
