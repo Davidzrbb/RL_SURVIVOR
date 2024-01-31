@@ -2,6 +2,7 @@ import arcade
 from constants import *
 import random
 from utils import state_to_xy, xy_to_state
+import copy
 
 class Enemy:
 
@@ -82,8 +83,8 @@ class Enemy:
                 
     def update(self, agent):
         
-        for id in self.enemy_id_to_pos:
-            self.follow_agent(id, agent)
+        for cpt in range(0, len(self.enemy_id_to_pos)):
+            self.follow_agent(cpt, agent)
     
     def follow_agent(self, id, agent):
         # Utilisez une liste contenant votre sprite ennemi comme premier argument
@@ -108,4 +109,3 @@ class Enemy:
 
             self.enemy_id_to_pos[id] = xy_to_state(self.enemy_sprite_list[id].center_x, self.enemy_sprite_list[id].center_y)
             
-            print(self.enemy_id_to_pos[id])

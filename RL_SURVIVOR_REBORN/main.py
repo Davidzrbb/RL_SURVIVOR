@@ -6,6 +6,7 @@ from bullet import Bullet
 from health_bar import HealthBar
 from xp_bar import XpBar
 from enemy import Enemy
+from colision_manager import ColisionManager
 
 class MyWindow(arcade.Window):
     def __init__(self):
@@ -16,11 +17,14 @@ class MyWindow(arcade.Window):
         self.health_bar = HealthBar() #init et draw barre de vie
         self.xp_bar = XpBar() #init et draw barre d'xp
         self.enemy = Enemy(self.environment) #init et draw les ennemies
+        self.colision_manager = ColisionManager()
 
     def on_update(self, delta_time):
+        self.colision_manager.update(self.bullet, self.enemy)
+
         self.environment.reset_map()
 
-        self.agent.update()
+        # self.agent.update()
         self.environment.update_map(self.agent.state, MAP_AGENT)
         
         self.bullet.update(delta_time, self, self.agent)
@@ -33,6 +37,11 @@ class MyWindow(arcade.Window):
         self.enemy.update(self.agent)
         for id in self.enemy.enemy_id_to_pos:
             self.environment.update_map(self.enemy.enemy_id_to_pos[id], MAP_ENEMY)
+
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        self.agent.agent_sprite.center_x = x
+        self.agent.agent_sprite.center_y = y    
 
     def on_draw(self):
         arcade.start_render()

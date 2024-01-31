@@ -34,7 +34,8 @@ class HealthBar:
        self.empty_box.center_x, self.empty_box.center_y = agent.agent_sprite.center_x, agent.agent_sprite.center_y + 30
        self.hp_box.center_x, self.hp_box.center_y = ((agent.agent_sprite.center_x - 50) + (self.health_value/2), agent.agent_sprite.center_y + 30)
         
-
+    def loose_hp(self):
+        self.health_value -= 10
         
     
 
