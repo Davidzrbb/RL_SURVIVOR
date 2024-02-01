@@ -15,7 +15,7 @@ class Enemy:
         self.playing_field_right_boundary = GRID_WIDTH * SPRITE_SIZE  # ou une valeur appropriée
         self.playing_field_top_boundary = GRID_HEIGHT * SPRITE_SIZE  # ou une valeur appropriée
         self.playing_field_bottom_boundary = 0
-        self.enemy_id_removed = []
+        self.enemy_id_pos_removed = {}
         self.setup()
 
     def setup(self):
@@ -82,7 +82,7 @@ class Enemy:
 
     def update(self, agent):
         #check if enemy dead is removed
-        for id in self.enemy_id_removed:
+        for id in self.enemy_id_pos_removed.keys():
             if id in self.enemy_id_to_pos:
                 self.enemy_id_to_pos.pop(id)
 

@@ -1,4 +1,6 @@
 import arcade
+
+from coin import Coin
 from constants import *
 from environment import Environment
 from agent import Agent
@@ -18,6 +20,7 @@ class MyWindow(arcade.Window):
         self.health_bar = HealthBar()  # init et draw barre de vie
         self.xp_bar = XpBar()  # init et draw barre d'xp
         self.enemy = Enemy(self.environment)  # init et draw les ennemies
+        self.coin = Coin()  # init et draw les coins
         self.collision_manager = CollisionManager()
 
     def on_update(self, delta_time):
@@ -35,8 +38,19 @@ class MyWindow(arcade.Window):
         self.health_bar.update(self.agent)
         self.xp_bar.update(self.agent)
 
-        self.enemy.update(self.agent)
+        #Pour chaque ennemi tué, je recupère son id et
+        # je lui donne son id à l'id de la piece que je veux creer
+        # et s'il y a nouveau ennemie tué donc il n'y a pas de coin a cette id
+        # dans enemy_id_pos_removed j'ai id et sa pos quand il est mort
+        for id in self.enemy.enemy_id_pos_removed.keys():
+            if id not in self.coin.coin_id_to_pos.keys():
+                self.coin.add_coin(id, self.enemy.enemy_id_pos_removed[id])
 
+        #j'ajoute la piece dans la map
+        for id in self.coin.coin_id_to_pos:
+            self.environment.update_map(self.coin.coin_id_to_pos[id], MAP_XP)
+
+        self.enemy.update(self.agent)
         for id in self.enemy.enemy_id_to_pos:
             self.environment.update_map(self.enemy.enemy_id_to_pos[id], MAP_ENEMY)
 
@@ -52,6 +66,7 @@ class MyWindow(arcade.Window):
         self.health_bar.on_draw()
         self.xp_bar.on_draw()
         self.enemy.on_draw()
+        self.coin.on_draw()
 
         # def reload(self):
 
