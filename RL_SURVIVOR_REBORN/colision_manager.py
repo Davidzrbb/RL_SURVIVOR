@@ -16,7 +16,10 @@ class CollisionManager:
             state = bullet.bullet_id_to_pos[bullet_id]
 
             # Find the key in enemy_id_to_pos with the matching value (state)
-            enemy_key = next((key for key, value in enemy.enemy_id_to_pos.items() if value == state), None)
+            enemy_key = next(
+                (key for key, value in enemy.enemy_id_to_pos.items() if
+                 value == state or (value[0], value[1]) == (state[0] - 1, state[1])),
+                None)
 
             if enemy_key is not None and enemy_key not in enemy.enemy_id_removed:
                 # Get the index of the enemy sprite based on the key
