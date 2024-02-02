@@ -13,10 +13,6 @@ class Bullet:
         self.total_time = 0.0
         self.bullet_last_pop = []
 
-        # id -> sprite
-        # id ==
-        # id -> pos
-
     def on_draw(self):
         self.bullet_sprite_list.draw()
 
@@ -36,13 +32,11 @@ class Bullet:
                 self.bullet_id_to_sprite[id].center_x += BULLET_SPEED
                 self.bullet_id_to_pos[id] = xy_to_state(self.bullet_id_to_sprite[id].center_x,
                                                         self.bullet_id_to_sprite[id].center_y)
-                # self.bullet_id_to_sprite[id].center_x, self.bullet_id_to_sprite[id].center_y = state_to_xy(
-                #     self.bullet_id_to_pos[id])
 
     def add_bullet(self, agent):
         self.bullet_sprite = arcade.Sprite(
             ":resources:images/space_shooter/laserBlue01.png", SPRITE_SCALING * 5)
-        self.bullet_sprite.center_x, self.bullet_sprite.center_y = state_to_xy(agent.state)
+        self.bullet_sprite.center_x, self.bullet_sprite.center_y = state_to_xy((agent.state[0], agent.state[1] + 1))
 
         if len(self.bullet_last_pop) == 0:
             self.bullet_id_to_pos[len(self.bullet_id_to_pos)] = agent.state

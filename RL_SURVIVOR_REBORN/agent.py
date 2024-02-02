@@ -9,10 +9,10 @@ class Agent:
     def __init__(self):
         self.agent_sprite = None
         self.agent_list = arcade.SpriteList()
-        self.state = (5,2)
+        self.state = AGENT_POS
 
         self.setup()
-        
+
     def setup(self):
         self.agent_list = arcade.SpriteList(use_spatial_hash=True)
         self.agent_sprite = arcade.Sprite(
@@ -22,8 +22,3 @@ class Agent:
 
     def on_draw(self):
         self.agent_list.draw()
-
-    def update(self):
-        direction = random.randint(0,4)          
-        self.state = direction, direction
-        self.agent_sprite.center_x, self.agent_sprite.center_y = state_to_xy((self.state))

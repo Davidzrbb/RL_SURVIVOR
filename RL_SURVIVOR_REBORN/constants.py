@@ -14,6 +14,7 @@ NB_ENEMIES = 5
 LVL_AGENT = 1
 
 PLAYER_HEALTH = 5
+AGENT_POS = (1, 1)
 
 MAP_WALL = 'W'  # Wall
 MAP_WALL_T = 'WT'  # Wall
@@ -39,7 +40,6 @@ REWARD_DEFAULT = -1
 REWARD_GOAL = 64
 
 AGENT_FILE = 'survivor.qtable'
-
 
 def set_nb_enemies(value):
     global NB_ENEMIES

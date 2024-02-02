@@ -1,4 +1,0 @@
-numpy
-arcade~=2.6.17
-pyglet~=2.0.dev23
-matplotlib~=3.3.4

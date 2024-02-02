@@ -1,5 +1,6 @@
 import arcade
 
+from RL_SURVIVOR_REBORN.rl_agent import ReinforcementLearning
 from coin import Coin
 from constants import *
 from environment import Environment
@@ -12,6 +13,7 @@ from colision_manager import CollisionManager
 
 
 class MyWindow(arcade.Window):
+
     def __init__(self):
         super().__init__(GRID_WIDTH * SPRITE_SIZE, GRID_HEIGHT * SPRITE_SIZE, SCREEN_TITLE)
         self.environment = Environment()  # init et draw l'environment
@@ -22,41 +24,56 @@ class MyWindow(arcade.Window):
         self.enemy = Enemy(self.environment)  # init et draw les ennemies
         self.coin = Coin()  # init et draw les coins
         self.collision_manager = CollisionManager()
+        self.reinforcement_learning = ReinforcementLearning()
 
     def on_update(self, delta_time):
-        self.collision_manager.update(self.bullet, self.enemy)
 
+        # remettre a zero la map
         self.environment.reset_map()
 
-        # self.agent.update()
-        self.environment.update_map(self.agent.state, MAP_AGENT)
-
+        # mettre a jour la position de la bullet
         self.bullet.update(delta_time, self, self.agent)
         for id in self.bullet.bullet_id_to_pos:
             self.environment.update_map(self.bullet.bullet_id_to_pos[id], MAP_BULLET)
 
-        self.health_bar.update(self.agent)
-        self.xp_bar.update(self.agent)
+        # mettre a jour la position de l'ennemie dans la map
+        self.enemy.update(self.agent)
+        for id in self.enemy.enemy_id_to_pos:
+            self.environment.update_map(self.enemy.enemy_id_to_pos[id], MAP_ENEMY)
 
-        #Pour chaque ennemi tué, je recupère son id et
+        # verifier les colisions
+        self.collision_manager.collision_between_bullet_and_enemy(self.bullet, self.enemy)
+
+        # Pour chaque ennemi tué, je recupère son id et
         # je lui donne son id à l'id de la piece que je veux creer
         # et s'il y a nouveau ennemie tué donc il n'y a pas de coin a cette id
         # dans enemy_id_pos_removed j'ai id et sa pos quand il est mort
         for id in self.enemy.enemy_id_pos_removed.keys():
             if id not in self.coin.coin_id_to_pos.keys():
                 self.coin.add_coin(id, self.enemy.enemy_id_pos_removed[id])
-
-        #j'ajoute la piece dans la map
+        # mettre a jour la position de la coin dans la map
         for id in self.coin.coin_id_to_pos:
             self.environment.update_map(self.coin.coin_id_to_pos[id], MAP_XP)
 
-        self.enemy.update(self.agent)
-        for id in self.enemy.enemy_id_to_pos:
-            self.environment.update_map(self.enemy.enemy_id_to_pos[id], MAP_ENEMY)
+        # calculer la meilleur action pour l'agent
+        self.reinforcement_learning.do(self.environment.map)
 
-    def on_mouse_motion(self, x, y, dx, dy):
-        self.agent.agent_sprite.center_x = x
-        self.agent.agent_sprite.center_y = y
+        # mettre a jour la position de l'agent
+        self.reinforcement_learning.update_player(self.agent)
+
+        # mettre a jour la map avec la position de l'agent
+        self.environment.update_map(self.agent.state, MAP_AGENT)
+
+        # mettre a jour la position de barre de vie et d'xp
+        self.health_bar.update(self.agent)
+        self.xp_bar.update(self.agent)
+
+        # verifier les colisions entre l'agent et les coins
+        self.collision_manager.collision_between_agent_and_coin(self.agent, self.coin)
+
+    # def on_mouse_motion(self, x, y, dx, dy):
+    #     self.agent.agent_sprite.center_x = x
+    #     self.agent.agent_sprite.center_y = y
 
     def on_draw(self):
         arcade.start_render()

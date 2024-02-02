@@ -14,10 +14,7 @@ class CollisionManager:
     def setup(self):
         pass
 
-    def update(self, bullet, enemy):
-        self.colision_between_bullet_and_enemy(bullet, enemy)
-
-    def colision_between_bullet_and_enemy(self, bullet, enemy):
+    def collision_between_bullet_and_enemy(self, bullet, enemy):
         # on check si le bullet touche un ennemi avec la hitbox
         # si oui on kill le bullet et l'ennemi et on ajoute l'id et la pos de l'ennemi dans la liste des ennemis tués
         # on ne verifie plus par rapport à leur position dans la map pour kill ou non car pas assez précis
@@ -36,3 +33,10 @@ class CollisionManager:
                 bullet.bullet_id_to_sprite[bullet_id].kill()
                 bullet.bullet_last_pop.append(bullet_id)
                 bullet.bullet_id_to_pos.pop(bullet_id)
+    def collision_between_agent_and_coin(self, agent, coin):
+        # on check si l'agent touche une coin avec la hitbox
+        for coin_id in copy.copy(coin.coin_id_to_pos):
+            check_hitbox_coin = arcade.check_for_collision(agent.agent_sprite, coin.coin_id_to_sprite[coin_id])
+            if check_hitbox_coin:
+                coin.coin_id_to_sprite[coin_id].kill()
+

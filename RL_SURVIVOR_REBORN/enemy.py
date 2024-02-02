@@ -81,12 +81,12 @@ class Enemy:
             cpt += 1
 
     def update(self, agent):
-        #check if enemy dead is removed
+        # check if enemy dead is removed
         for id in self.enemy_id_pos_removed.keys():
             if id in self.enemy_id_to_pos:
                 self.enemy_id_to_pos.pop(id)
 
-        #moving enemy
+        # moving enemy
         for cpt in range(0, len(self.enemy_id_to_pos)):
             self.follow_agent(cpt, agent)
 
