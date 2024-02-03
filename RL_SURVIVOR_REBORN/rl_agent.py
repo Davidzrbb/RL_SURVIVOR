@@ -13,6 +13,10 @@ class ReinforcementLearning:
         # self.reset()
         # self.add_state(self.state)
 
+    def setup(self):
+        self.position = AGENT_POS
+        self.map = {}
+
     def do(self, map_actual):
         self.map = map_actual
         action = self.best_action()

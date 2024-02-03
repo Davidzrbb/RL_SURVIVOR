@@ -9,6 +9,7 @@ from bullet import Bullet
 from health_bar import HealthBar
 from xp_bar import XpBar
 from enemy import Enemy
+from game_over import GameOver
 from colision_manager import CollisionManager
 
 
@@ -25,6 +26,7 @@ class MyWindow(arcade.Window):
         self.coin = Coin()  # init et draw les coins
         self.collision_manager = CollisionManager()
         self.reinforcement_learning = ReinforcementLearning()
+        self.game_over = GameOver()
 
     def on_update(self, delta_time):
 
@@ -55,19 +57,27 @@ class MyWindow(arcade.Window):
         for id in self.coin.coin_id_to_pos:
             self.environment.update_map(self.coin.coin_id_to_pos[id], MAP_XP)
 
+        # verifier les colisions entre l'agent et les ennemies
+        self.collision_manager.collision_between_agent_and_ennemies(self.agent, self.enemy, self.health_bar)
+
+        # verifier si l'agent est mort
+        if self.game_over.is_game_over(self.health_bar):
+            if self.game_over.wait_3_sec(delta_time):
+                self.reload()
+        else:
         # calculer la meilleur action pour l'agent
-        self.reinforcement_learning.do(self.environment.map)
+            self.reinforcement_learning.do(self.environment.map)
 
-        # mettre a jour la position de l'agent
-        self.reinforcement_learning.update_player(self.agent)
+            # mettre a jour la position de l'agent
+            self.reinforcement_learning.update_player(self.agent)
 
-        # mettre a jour la map avec la position de l'agent
-        self.environment.update_map(self.agent.state, MAP_AGENT)
+            # mettre a jour la map avec la position de l'agent
+            self.environment.update_map(self.agent.state, MAP_AGENT)
 
         # verifier les colisions entre l'agent et les coins
         self.collision_manager.collision_between_agent_and_coin(self.agent, self.coin, self.xp_bar)
 
-         # mettre a jour la position de barre de vie et d'xp
+        # mettre a jour la position de barre de vie et d'xp
         self.health_bar.update(self.agent)
         self.xp_bar.update(self.agent)
 
@@ -84,10 +94,21 @@ class MyWindow(arcade.Window):
         self.xp_bar.on_draw()
         self.enemy.on_draw()
         self.coin.on_draw()
-
+        # verifier si l'agent est mort
+        if self.game_over.is_game_over(self.health_bar):
+            self.game_over.on_draw()
         # def reload(self):
 
-        
+    def reload(self):
+        self.environment.setup()
+        self.agent.setup()
+        self.bullet.setup()
+        self.health_bar.setup()
+        self.xp_bar.setup()
+        self.enemy.setup()
+        self.coin.setup()
+        self.reinforcement_learning.setup()
+        self.game_over.setup()
 
 
 def main():

@@ -14,6 +14,7 @@ class Agent:
         self.setup()
 
     def setup(self):
+        self.state = AGENT_POS
         self.agent_list = arcade.SpriteList(use_spatial_hash=True)
         self.agent_sprite = arcade.Sprite(
             ":resources:images/animated_characters/male_adventurer/maleAdventurer_walk0.png", SPRITE_SCALING)

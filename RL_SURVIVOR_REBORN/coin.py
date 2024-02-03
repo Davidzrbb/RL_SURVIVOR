@@ -11,6 +11,11 @@ class Coin:
         self.coin_id_to_pos = {}
         self.coin_id_to_sprite = {}
 
+    def setup(self):
+        self.coin_sprite_list = arcade.SpriteList()
+        self.coin_id_to_pos = {}
+        self.coin_id_to_sprite = {}
+
     def on_draw(self):
         self.coin_sprite_list.draw()
 

@@ -8,6 +8,8 @@ import copy
 class Enemy:
 
     def __init__(self, env):
+        self.physics_engine_list = None
+        self.barrier_list = None
         self.env = env
         self.enemy_sprite_list = None
         self.enemy_id_to_pos = {}
@@ -19,6 +21,9 @@ class Enemy:
         self.setup()
 
     def setup(self):
+        self.enemy_id_to_pos = {}
+        self.enemy_id_pos_removed = {}
+    
         self.enemy_sprite_list = arcade.SpriteList()
         self.spawn_zombie()
 

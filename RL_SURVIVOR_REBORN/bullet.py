@@ -13,6 +13,13 @@ class Bullet:
         self.total_time = 0.0
         self.bullet_last_pop = []
 
+    def setup(self):
+        self.bullet_sprite_list = arcade.SpriteList()
+        self.bullet_id_to_sprite = {}
+        self.bullet_id_to_pos = {}
+        self.total_time = 0.0
+        self.bullet_last_pop = []
+
     def on_draw(self):
         self.bullet_sprite_list.draw()
 
