@@ -1,6 +1,6 @@
 import arcade
 
-from RL_SURVIVOR_REBORN.rl_agent import ReinforcementLearning
+from rl_agent import ReinforcementLearning
 from coin import Coin
 from constants import *
 from environment import Environment
@@ -64,12 +64,12 @@ class MyWindow(arcade.Window):
         # mettre a jour la map avec la position de l'agent
         self.environment.update_map(self.agent.state, MAP_AGENT)
 
-        # mettre a jour la position de barre de vie et d'xp
+        # verifier les colisions entre l'agent et les coins
+        self.collision_manager.collision_between_agent_and_coin(self.agent, self.coin, self.xp_bar)
+
+         # mettre a jour la position de barre de vie et d'xp
         self.health_bar.update(self.agent)
         self.xp_bar.update(self.agent)
-
-        # verifier les colisions entre l'agent et les coins
-        self.collision_manager.collision_between_agent_and_coin(self.agent, self.coin)
 
     # def on_mouse_motion(self, x, y, dx, dy):
     #     self.agent.agent_sprite.center_x = x
@@ -86,6 +86,8 @@ class MyWindow(arcade.Window):
         self.coin.on_draw()
 
         # def reload(self):
+
+        
 
 
 def main():

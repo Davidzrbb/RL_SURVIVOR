@@ -1,7 +1,7 @@
 import pickle
 from os.path import exists
 
-from RL_SURVIVOR_REBORN.utils import state_to_xy, xy_to_state
+from utils import state_to_xy, xy_to_state
 from constants import *
 from random import *
 

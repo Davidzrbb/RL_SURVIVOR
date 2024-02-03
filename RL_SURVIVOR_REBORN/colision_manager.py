@@ -2,7 +2,7 @@ import copy
 
 import arcade
 
-from RL_SURVIVOR_REBORN.utils import xy_to_state
+from utils import xy_to_state
 from constants import *
 
 
@@ -33,10 +33,12 @@ class CollisionManager:
                 bullet.bullet_id_to_sprite[bullet_id].kill()
                 bullet.bullet_last_pop.append(bullet_id)
                 bullet.bullet_id_to_pos.pop(bullet_id)
-    def collision_between_agent_and_coin(self, agent, coin):
+    def collision_between_agent_and_coin(self, agent, coin, xp_bar):
         # on check si l'agent touche une coin avec la hitbox
         for coin_id in copy.copy(coin.coin_id_to_pos):
-            check_hitbox_coin = arcade.check_for_collision(agent.agent_sprite, coin.coin_id_to_sprite[coin_id])
+            check_hitbox_coin = arcade.check_for_collision_with_list(agent.agent_sprite, coin.coin_sprite_list)
             if check_hitbox_coin:
-                coin.coin_id_to_sprite[coin_id].kill()
+                # coin_sprite_index = coin.coin_sprite_list.index(check_hitbox_coin[0])
+                check_hitbox_coin[0].kill()
+                xp_bar.add_xp()    
 
