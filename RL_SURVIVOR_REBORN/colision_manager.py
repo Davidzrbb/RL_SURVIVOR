@@ -46,4 +46,5 @@ class CollisionManager:
         pos_agent = agent.state
         check_hitbox_enemy = arcade.check_for_collision_with_list(agent.agent_sprite, enemy.enemy_sprite_list)
         if check_hitbox_enemy:
-            health_bar.loose_hp()
+            pass
+            # health_bar.loose_hp()

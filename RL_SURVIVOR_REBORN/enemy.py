@@ -23,7 +23,7 @@ class Enemy:
     def setup(self):
         self.enemy_id_to_pos = {}
         self.enemy_id_pos_removed = {}
-    
+
         self.enemy_sprite_list = arcade.SpriteList()
         self.spawn_zombie()
 
@@ -90,7 +90,6 @@ class Enemy:
         for id in self.enemy_id_pos_removed.keys():
             if id in self.enemy_id_to_pos:
                 self.enemy_id_to_pos.pop(id)
-
         # moving enemy
         for cpt in range(0, len(self.enemy_id_to_pos)):
             self.follow_agent(cpt, agent)

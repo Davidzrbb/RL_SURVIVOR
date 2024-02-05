@@ -102,8 +102,8 @@ class Agent:
         # self.radar_list.draw()
 
     def update(self, delta_time):
-        self.indicator_bar.position = self.agent_sprite.center_x, self.agent_sprite.center_y + 35
-        self.indicator_xp_bar.position = self.agent_sprite.center_x, self.agent_sprite.center_y + 25
+        self.indicator_bar.position_agent = self.agent_sprite.center_x, self.agent_sprite.center_y + 35
+        self.indicator_xp_bar.position_agent = self.agent_sprite.center_x, self.agent_sprite.center_y + 25
         # the bullet move to the end of the map and then disappear
         if self.bullet_sprite.center_x > self.window.width or self.bullet_sprite.center_y > self.window.height or \
                 self.bullet_sprite.center_x < 0 or self.bullet_sprite.center_y < 0:

@@ -1,4 +1,5 @@
 import arcade
+from matplotlib import pyplot as plt
 
 from rl_agent import ReinforcementLearning
 from coin import Coin
@@ -65,8 +66,8 @@ class MyWindow(arcade.Window):
             if self.game_over.wait_3_sec(delta_time):
                 self.reload()
         else:
-        # calculer la meilleur action pour l'agent
-            self.reinforcement_learning.do(self.environment.map)
+            # calculer la meilleur action pour l'agent
+            self.reinforcement_learning.do(self.environment.map,self.coin.coin_id_to_pos)
 
             # mettre a jour la position de l'agent
             self.reinforcement_learning.update_player(self.agent)
@@ -107,17 +108,22 @@ class MyWindow(arcade.Window):
         self.xp_bar.setup()
         self.enemy.setup()
         self.coin.setup()
-        self.reinforcement_learning.setup()
+        self.reinforcement_learning.reset()
         self.game_over.setup()
+        set_nb_enemies(2)
 
 
 def main():
+    reinforcement_learning = ReinforcementLearning()
+    reinforcement_learning.load(AGENT_FILE)
     window = MyWindow()
     window.center_window()
     arcade.run()
+    reinforcement_learning.save(AGENT_FILE)
+    plt.plot(reinforcement_learning.history)
+    plt.show()
 
 
 if __name__ == "__main__":
     main()
 
-# TODO loose hp, gain xp

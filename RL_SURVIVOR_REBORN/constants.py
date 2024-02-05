@@ -10,7 +10,7 @@ GRID_HEIGHT = 20
 SPRITE_SPEED = 3
 BULLET_SPEED = 10
 RELOAD_BULLET_TIME = 3
-NB_ENEMIES = 3
+NB_ENEMIES = 2
 LVL_AGENT = 1
 
 PLAYER_HEALTH = 5
@@ -40,6 +40,7 @@ REWARD_DEFAULT = -1
 REWARD_GOAL = 64
 
 AGENT_FILE = 'survivor.qtable'
+
 
 def set_nb_enemies(value):
     global NB_ENEMIES
