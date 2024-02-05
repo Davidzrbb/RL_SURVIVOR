@@ -31,6 +31,8 @@ class MyWindow(arcade.Window):
 
     def on_update(self, delta_time):
 
+        
+
         # remettre a zero la map
         self.environment.reset_map()
 
@@ -45,15 +47,15 @@ class MyWindow(arcade.Window):
             self.environment.update_map(self.enemy.enemy_id_to_pos[id], MAP_ENEMY)
 
         # verifier les colisions
-        self.collision_manager.collision_between_bullet_and_enemy(self.bullet, self.enemy)
+        self.collision_manager.collision_between_bullet_and_enemy(self.bullet, self.enemy, self.coin)
 
         # Pour chaque ennemi tué, je recupère son id et
         # je lui donne son id à l'id de la piece que je veux creer
         # et s'il y a nouveau ennemie tué donc il n'y a pas de coin a cette id
         # dans enemy_id_pos_removed j'ai id et sa pos quand il est mort
-        for id in self.enemy.enemy_id_pos_removed.keys():
-            if id not in self.coin.coin_id_to_pos.keys():
-                self.coin.add_coin(id, self.enemy.enemy_id_pos_removed[id])
+        # for id in self.enemy.enemy_id_pos_removed.keys():
+        #     if id not in self.coin.coin_id_to_pos.keys():
+        #         self.coin.add_coin(id, self.enemy.enemy_id_pos_removed[id])
         # mettre a jour la position de la coin dans la map
         for id in self.coin.coin_id_to_pos:
             self.environment.update_map(self.coin.coin_id_to_pos[id], MAP_XP)
@@ -82,6 +84,15 @@ class MyWindow(arcade.Window):
         self.health_bar.update(self.agent)
         self.xp_bar.update(self.agent)
 
+        if(len(self.enemy.enemy_id_pos_removed) == get_nb_enemies() and get_nb_enemies() != 10):
+            set_nb_enemies(get_nb_enemies() + 2)
+            self.enemy = Enemy(self.environment)
+        elif(len(self.enemy.enemy_id_pos_removed) == get_nb_enemies() and get_nb_enemies() == 10):
+            self.reload()
+
+
+
+        
     # def on_mouse_motion(self, x, y, dx, dy):
     #     self.agent.agent_sprite.center_x = x
     #     self.agent.agent_sprite.center_y = y
@@ -106,11 +117,11 @@ class MyWindow(arcade.Window):
         self.bullet.setup()
         self.health_bar.setup()
         self.xp_bar.setup()
+        set_nb_enemies(2)
         self.enemy.setup()
         self.coin.setup()
         self.reinforcement_learning.reset()
         self.game_over.setup()
-        set_nb_enemies(2)
 
 
 def main():

@@ -59,7 +59,11 @@ class XpBar:
     def add_xp(self):
         self.bool = True
 
-        self.xp_value += (100 / get_nb_enemies())
+        self.xp_value += (100 / (self.xp_level * 2))
         if self.xp_value >= 100:
             self.xp_value -= 100
             self.xp_level += 1
+
+            set_bullet_time(get_bullet_time() - 0.5)
+
+

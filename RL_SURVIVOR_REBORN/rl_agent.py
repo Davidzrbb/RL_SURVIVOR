@@ -1,7 +1,6 @@
 import pickle
 from os.path import exists
 
-from rl.rl_agent import arg_max
 from utils import state_to_xy, xy_to_state
 from constants import *
 from random import *
@@ -13,6 +12,8 @@ def sign(x):
     # Si x est égal à 0, la fonction renvoie 0.
     return 1 if x > 0 else -1 if x < 0 else 0
 
+def arg_max(table):
+    return max(table, key=table.get)
 
 class ReinforcementLearning:
     def __init__(self, learning_rate=1, discount_factor=0.9):
@@ -116,6 +117,7 @@ class ReinforcementLearning:
                 reward = REWARD_DEFAULT
 
         return [new_position, reward]
+
 
     def is_not_allowed(self, position):
         # si pas dans la map ou si pas vide ou si pas xp

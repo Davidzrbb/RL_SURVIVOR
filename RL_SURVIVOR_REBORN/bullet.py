@@ -14,6 +14,7 @@ class Bullet:
         self.bullet_last_pop = []
 
     def setup(self):
+        set_bullet_time(3)
         self.bullet_sprite_list = arcade.SpriteList()
         self.bullet_id_to_sprite = {}
         self.bullet_id_to_pos = {}
