@@ -53,13 +53,14 @@ class ReinforcementLearning:
                     # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
                     radar.append(MAP_WALL)
 
-        radar_goal = [0] * 9
-        for id in self.goal:
-            delta_row = sign(self.goal[id][0] - row) + 1
-            delta_col = sign(self.goal[id][0] - col) + 1
-            position = delta_row * 3 + delta_col
-            radar_goal[position] = 1
-        return tuple(radar + radar_goal)
+        # radar_goal = [0] * 9
+        # for id in self.goal:
+        #     delta_row = sign(self.goal[id][0] - row) + 1
+        #     delta_col = sign(self.goal[id][0] - col) + 1
+        #     position = delta_row * 3 + delta_col
+        #     radar_goal[position] = 1
+        # return tuple(radar + radar_goal)
+        return tuple(radar)
 
     def reset(self):
         self.position_agent = AGENT_POS
@@ -81,7 +82,6 @@ class ReinforcementLearning:
         action = self.best_action()
         self.position_agent, reward = self.move(self.position_agent, action)
         new_state = self.get_radar(self.position_agent)
-        print("new_state", new_state)
         self.score += reward
         self.iteration += 1
         # Q-learning
@@ -92,11 +92,11 @@ class ReinforcementLearning:
         self.qtable[self.state][action] += delta
         self.state = new_state
 
-        if self.position_agent in self.goal.values():
-            self.history.append(self.score)
-            self.noise *= 1 - 1E-1
-
         return action, reward
+
+    def save_history(self):
+        self.history.append(self.score)
+        self.noise *= 1 - 1E-1
 
     def best_action(self):
         if random() < self.noise:
@@ -108,7 +108,10 @@ class ReinforcementLearning:
         move = MOVES[action]
         new_position = (position[0] + move[0], position[1] + move[1])
         if self.is_not_allowed(new_position):
-            reward = REWARD_WALL
+            if self.map[new_position] == MAP_ENEMY:
+                reward = REWARD_ENEMY
+            else:
+                reward = REWARD_WALL
             new_position = position
         else:
             if new_position in self.goal:
@@ -129,6 +132,8 @@ class ReinforcementLearning:
         if self.map[position] not in [MAP_EMPTY, MAP_XP]:
             return True
         # check if adjacent cells are empty or xp
+        if(position[0] + 1 == 20 or position[1] + 1 == 30 or position[0] - 1 == -1 or position[1] - 1 == -1):
+            return True
         if self.map[(position[0] - 1, position[1])] is MAP_ENEMY:
             return True
         if self.map[(position[0] + 1, position[1])] is MAP_ENEMY:

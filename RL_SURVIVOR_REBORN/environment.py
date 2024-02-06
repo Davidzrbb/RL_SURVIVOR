@@ -67,15 +67,15 @@ class Environment:
                             self.map[row + 1, col] == self.map[row, col + 1] ==
                             self.map[row - 1, col - 1] == self.map[row + 1, col + 1] == MAP_EMPTY
                     ):
-                        if random.randint(0, 100) < 10:
+                        if random.randint(0, 100) < 3:
                             self.map[row, col] = MAP_OBSTACLE
-                            if random.randint(0, 100) < 10:
+                            if random.randint(0, 100) < 3:
                                 self.map[row, col + 1] = MAP_OBSTACLE
-                            if random.randint(0, 100) < 10:
+                            if random.randint(0, 100) < 3:
                                 self.map[row + 1, col] = MAP_OBSTACLE
-                        if random.randint(0, 100) < 10:
+                        if random.randint(0, 100) < 3:
                             self.map[row, col] = MAP_OBSTACLE2
-                        if random.randint(0, 100) < 10:
+                        if random.randint(0, 100) < 3:
                             self.map[row, col] = MAP_OBSTACLE3
 
         self.original_map = copy.deepcopy(self.map)
@@ -145,6 +145,13 @@ class Environment:
                 obstacle_sprite.center_x, obstacle_sprite.center_y = state_to_xy(state)
                 self.obstacle_list.append(background_sprite)
                 self.obstacle_list.append(obstacle_sprite)
+
+                for sprite in self.wall_list:
+                    self.obstacle_list.append(copy.copy(sprite))
+
+                for sprite in self.wall_T_list:
+                    self.obstacle_list.append(copy.copy(sprite))
+
 
     def update_map(self, state, value):
         self.map[state] = value

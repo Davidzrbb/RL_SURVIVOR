@@ -70,7 +70,7 @@ class MyWindow(arcade.Window):
         else:
             # calculer la meilleur action pour l'agent
             self.reinforcement_learning.do(self.environment.map,self.coin.coin_id_to_pos)
-
+            
             # mettre a jour la position de l'agent
             self.reinforcement_learning.update_player(self.agent)
 
@@ -112,6 +112,7 @@ class MyWindow(arcade.Window):
         # def reload(self):
 
     def reload(self):
+        self.reinforcement_learning.save_history()
         self.environment.setup()
         self.agent.setup()
         self.bullet.setup()
@@ -125,13 +126,13 @@ class MyWindow(arcade.Window):
 
 
 def main():
-    reinforcement_learning = ReinforcementLearning()
-    reinforcement_learning.load(AGENT_FILE)
+    
     window = MyWindow()
+    window.reinforcement_learning.load(AGENT_FILE)
     window.center_window()
     arcade.run()
-    reinforcement_learning.save(AGENT_FILE)
-    plt.plot(reinforcement_learning.history)
+    window.reinforcement_learning.save(AGENT_FILE)
+    plt.plot(window.reinforcement_learning.history)
     plt.show()
 
 
