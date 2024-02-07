@@ -31,7 +31,7 @@ class MyWindow(arcade.Window):
 
     def on_update(self, delta_time):
 
-        
+
 
         # remettre a zero la map
         self.environment.reset_map()
@@ -70,7 +70,7 @@ class MyWindow(arcade.Window):
         else:
             # calculer la meilleur action pour l'agent
             self.reinforcement_learning.do(self.environment.map,self.coin.coin_id_to_pos)
-            
+
             # mettre a jour la position de l'agent
             self.reinforcement_learning.update_player(self.agent)
 
@@ -92,7 +92,7 @@ class MyWindow(arcade.Window):
 
 
 
-        
+
     # def on_mouse_motion(self, x, y, dx, dy):
     #     self.agent.agent_sprite.center_x = x
     #     self.agent.agent_sprite.center_y = y
@@ -126,7 +126,7 @@ class MyWindow(arcade.Window):
 
 
 def main():
-    
+
     window = MyWindow()
     window.reinforcement_learning.load(AGENT_FILE)
     window.center_window()

@@ -46,8 +46,6 @@ class CollisionManager:
 
     def collision_between_agent_and_ennemies(self, agent, enemy, health_bar):
         # on check si l'agent touche une coin avec la hitbox
-        pos_agent = agent.state
         check_hitbox_enemy = arcade.check_for_collision_with_list(agent.agent_sprite, enemy.enemy_sprite_list)
         if check_hitbox_enemy:
-            # pass
             health_bar.loose_hp()

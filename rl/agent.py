@@ -99,7 +99,7 @@ class Agent:
         self.indicator_bar.bar_list.draw()
         # self.indicator_xp_bar.draw_level_indicator()
         self.indicator_xp_bar.bar_list.draw()
-        # self.radar_list.draw()
+        self.radar_list.draw()
 
     def update(self, delta_time):
         self.indicator_bar.position_agent = self.agent_sprite.center_x, self.agent_sprite.center_y + 35
