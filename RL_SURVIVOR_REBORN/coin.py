@@ -1,3 +1,5 @@
+import uuid
+
 import arcade
 
 from constants import *
@@ -19,10 +21,12 @@ class Coin:
     def on_draw(self):
         self.coin_sprite_list.draw()
 
-    def add_coin(self, id, state):
+    def add_coin(self, state):
         self.coin_sprite = arcade.Sprite(
             ":resources:images/items/coinGold.png", SPRITE_SCALING)
         self.coin_sprite.center_x, self.coin_sprite.center_y = state_to_xy(state)
         self.coin_sprite_list.append(self.coin_sprite)
+        # random id generator here
+        id = uuid.uuid4()
         self.coin_id_to_pos[id] = state
         self.coin_id_to_sprite[id] = self.coin_sprite

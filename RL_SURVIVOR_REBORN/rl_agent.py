@@ -119,61 +119,37 @@ class ReinforcementLearning:
         move = MOVES[action]
         new_position = (position[0] + move[0], position[1] + move[1])
         reward = self.is_not_allowed(new_position)
-        print("reward: ", reward)
-        if reward in [REWARD_ENEMY, REWARD_NEAR_ENEMY, False]:
+        if reward == REWARD_DEFAULT:
+            if self.map[new_position] != MAP_EMPTY:
+                new_position = position
+        if reward in [REWARD_ENEMY, REWARD_NEAR_ENEMY]:
             new_position = position
 
         return [new_position, reward]
 
     def is_not_allowed(self, position):
-        # si pas dans la map ou si pas vide ou si pas xp
-        # si True, on ne peut pas aller dans cette direction
-        # si False, on peut aller dans cette direction
+
         if position not in self.map:
             return REWARD_ENEMY
+
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
+
+        for direction in directions:
+            neighbor_position = (position[0] + direction[0], position[1] + direction[1])
+
+            if self.map.get(neighbor_position) == MAP_XP:
+                return REWARD_NEAR_GOAL
+
+            if self.map.get(neighbor_position) == MAP_ENEMY:
+                return REWARD_NEAR_ENEMY
+
         if self.map[position] == MAP_XP:
             return REWARD_GOAL
+
         if self.map[position] == MAP_ENEMY:
             return REWARD_ENEMY
-        if self.map[position] == MAP_EMPTY:
-            return REWARD_DEFAULT
-        # check if adjacent cells are enemy or xp
-        if position[0] + 1 == 20 or position[1] + 1 == 30 or position[0] - 1 == -1 or position[1] - 1 == -1:
-            return REWARD_DEFAULT
-        if self.map[(position[0] - 1, position[1])] == MAP_XP:
-            return REWARD_NEAR_GOAL
-        if self.map[(position[0] + 1, position[1])] == MAP_XP:
-            return REWARD_NEAR_GOAL
-        if self.map[(position[0], position[1] - 1)] == MAP_XP:
-            return REWARD_NEAR_GOAL
-        if self.map[(position[0], position[1] + 1)] == MAP_XP:
-            return REWARD_NEAR_GOAL
-        if self.map[(position[0] + 1, position[1] + 1)] == MAP_XP:
-            return REWARD_NEAR_GOAL
-        if self.map[(position[0] - 1, position[1] - 1)] == MAP_XP:
-            return REWARD_NEAR_GOAL
-        if self.map[(position[0] - 1, position[1] + 1)] == MAP_XP:
-            return REWARD_NEAR_GOAL
-        if self.map[(position[0] + 1, position[1] - 1)] == MAP_XP:
-            return REWARD_NEAR_GOAL
-        if self.map[(position[0] - 1, position[1])] == MAP_ENEMY:
-            return REWARD_NEAR_ENEMY
-        if self.map[(position[0] + 1, position[1])] == MAP_ENEMY:
-            return REWARD_NEAR_ENEMY
-        if self.map[(position[0], position[1] - 1)] == MAP_ENEMY:
-            return REWARD_NEAR_ENEMY
-        if self.map[(position[0], position[1] + 1)] == MAP_ENEMY:
-            return REWARD_NEAR_ENEMY
-        if self.map[(position[0] + 1, position[1] + 1)] == MAP_ENEMY:
-            return REWARD_NEAR_ENEMY
-        if self.map[(position[0] - 1, position[1] - 1)] == MAP_ENEMY:
-            return REWARD_NEAR_ENEMY
-        if self.map[(position[0] - 1, position[1] + 1)] == MAP_ENEMY:
-            return REWARD_NEAR_ENEMY
-        if self.map[(position[0] + 1, position[1] - 1)] == MAP_ENEMY:
-            return REWARD_NEAR_ENEMY
 
-        return False
+        return REWARD_DEFAULT
 
     def load(self, filename):
         if exists(filename):
