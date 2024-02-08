@@ -29,25 +29,24 @@ class CollisionManager:
                         enemy.enemy_sprite_list[enemy_sprite_index].center_x,
                         enemy.enemy_sprite_list[enemy_sprite_index].center_y)
                     enemy.enemy_sprite_list[enemy_sprite_index].kill()
-
+                    coin.add_coin(enemy.enemy_id_pos_removed[id_enemy])
                 bullet.bullet_id_to_sprite[bullet_id].kill()
                 bullet.bullet_last_pop.append(bullet_id)
                 bullet.bullet_id_to_pos.pop(bullet_id)
-
-                coin.add_coin(id, enemy.enemy_id_pos_removed[id_enemy])
-
 
     def collision_between_agent_and_coin(self, agent, coin, xp_bar):
         # on check si l'agent touche une coin avec la hitbox
         check_hitbox_coin = arcade.check_for_collision_with_list(agent.agent_sprite, coin.coin_sprite_list)
         if check_hitbox_coin:
-            check_hitbox_coin[0].kill()
+            if check_hitbox_coin[0] in coin.coin_id_to_sprite.values():
+                coin_index = list(coin.coin_id_to_sprite.values()).index(check_hitbox_coin[0])
+                coin_id = list(coin.coin_id_to_sprite.keys())[coin_index]
+                coin.coin_id_to_pos.pop(coin_id)
             xp_bar.add_xp()
+            check_hitbox_coin[0].kill()
 
     def collision_between_agent_and_ennemies(self, agent, enemy, health_bar):
         # on check si l'agent touche une coin avec la hitbox
-        pos_agent = agent.state
         check_hitbox_enemy = arcade.check_for_collision_with_list(agent.agent_sprite, enemy.enemy_sprite_list)
         if check_hitbox_enemy:
-            # pass
             health_bar.loose_hp()

@@ -31,8 +31,6 @@ class MyWindow(arcade.Window):
 
     def on_update(self, delta_time):
 
-        
-
         # remettre a zero la map
         self.environment.reset_map()
 
@@ -49,14 +47,7 @@ class MyWindow(arcade.Window):
         # verifier les colisions
         self.collision_manager.collision_between_bullet_and_enemy(self.bullet, self.enemy, self.coin)
 
-        # Pour chaque ennemi tué, je recupère son id et
-        # je lui donne son id à l'id de la piece que je veux creer
-        # et s'il y a nouveau ennemie tué donc il n'y a pas de coin a cette id
-        # dans enemy_id_pos_removed j'ai id et sa pos quand il est mort
-        # for id in self.enemy.enemy_id_pos_removed.keys():
-        #     if id not in self.coin.coin_id_to_pos.keys():
-        #         self.coin.add_coin(id, self.enemy.enemy_id_pos_removed[id])
-        # mettre a jour la position de la coin dans la map
+        # mettre a jour la position des coins dans la map
         for id in self.coin.coin_id_to_pos:
             self.environment.update_map(self.coin.coin_id_to_pos[id], MAP_XP)
 
@@ -69,8 +60,8 @@ class MyWindow(arcade.Window):
                 self.reload()
         else:
             # calculer la meilleur action pour l'agent
-            self.reinforcement_learning.do(self.environment.map,self.coin.coin_id_to_pos)
-            
+            self.reinforcement_learning.do(self.environment.map, self.coin.coin_id_to_pos)
+
             # mettre a jour la position de l'agent
             self.reinforcement_learning.update_player(self.agent)
 
@@ -84,15 +75,12 @@ class MyWindow(arcade.Window):
         self.health_bar.update(self.agent)
         self.xp_bar.update(self.agent)
 
-        if(len(self.enemy.enemy_id_pos_removed) == get_nb_enemies() and get_nb_enemies() != 10):
+        if len(self.enemy.enemy_id_pos_removed) == get_nb_enemies() and get_nb_enemies() != 10:
             set_nb_enemies(get_nb_enemies() + 2)
             self.enemy = Enemy(self.environment)
-        elif(len(self.enemy.enemy_id_pos_removed) == get_nb_enemies() and get_nb_enemies() == 10):
+        elif len(self.enemy.enemy_id_pos_removed) == get_nb_enemies() and get_nb_enemies() == 10:
             self.reload()
 
-
-
-        
     # def on_mouse_motion(self, x, y, dx, dy):
     #     self.agent.agent_sprite.center_x = x
     #     self.agent.agent_sprite.center_y = y
@@ -126,7 +114,6 @@ class MyWindow(arcade.Window):
 
 
 def main():
-    
     window = MyWindow()
     window.reinforcement_learning.load(AGENT_FILE)
     window.center_window()
@@ -138,4 +125,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
