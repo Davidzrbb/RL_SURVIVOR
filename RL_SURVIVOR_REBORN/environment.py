@@ -57,7 +57,6 @@ class Environment:
                 else:
                     self.map[row, col] = MAP_EMPTY
 
-                
         # génére obstacles
         for row in range(1, GRID_HEIGHT - 2):
             for col in range(1, GRID_WIDTH - 3):

@@ -12,11 +12,13 @@ def sign(x):
     # Si x est égal à 0, la fonction renvoie 0.
     return 1 if x > 0 else -1 if x < 0 else 0
 
+
 def arg_max(table):
     return max(table, key=table.get)
 
+
 class ReinforcementLearning:
-    def __init__(self, learning_rate=1, discount_factor=0.9):
+    def __init__(self, learning_rate=0.45, discount_factor=0.5):
         self.goal = {}
         self.position_agent = AGENT_POS
         self.map = {}
@@ -34,7 +36,7 @@ class ReinforcementLearning:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.history = []
-        self.noise = 0
+        self.noise = 1
 
     def get_radar(self, position_agent):
         row, col = position_agent[0], position_agent[1]
@@ -42,24 +44,31 @@ class ReinforcementLearning:
         neighbors_close = [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
         for n in self.neighbors_average:
             neighbors_average.append((row + n[0], col + n[1]))
-        neighbor_categories = [neighbors_average, neighbors_close]
         radar = []
-        for category in neighbor_categories:
-            for n in category:
-                # si la case est dans la map, on ajoute la valeur de la case dans radar
-                if n in self.map:
-                    radar.append(self.map[n])
-                else:
-                    # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
-                    radar.append(MAP_WALL)
+        for n in neighbors_close:
+            if n in self.map:
+                radar.append(self.map[n])
+            else:
+                # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
+                radar.append(MAP_WALL)
 
-        # radar_goal = [0] * 9
-        # for id in self.goal:
-        #     delta_row = sign(self.goal[id][0] - row) + 1
-        #     delta_col = sign(self.goal[id][0] - col) + 1
-        #     position = delta_row * 3 + delta_col
-        #     radar_goal[position] = 1
-        # return tuple(radar + radar_goal)
+        for n in range(0, len(neighbors_average)):
+            list_case_value = []
+            if neighbors_average[n] in self.map:
+                list_case_value.append(self.map[neighbors_average[n]])
+                if n % 9 == 0 and n != 0:
+                    if MAP_ENEMY in list_case_value:
+                        radar.append(MAP_ENEMY)
+                    elif MAP_XP in list_case_value:
+                        radar.append(MAP_XP)
+                    elif MAP_WALL in list_case_value:
+                        radar.append(MAP_WALL)
+                    else:
+                        radar.append(MAP_EMPTY)
+                    list_case_value.clear()
+            else:
+                radar.append(MAP_WALL)
+
         return tuple(radar)
 
     def reset(self):
@@ -96,7 +105,9 @@ class ReinforcementLearning:
 
     def save_history(self):
         self.history.append(self.score)
-        self.noise *= 1 - 1E-1
+        self.noise -= 0.05
+        print('noise :', self.noise)
+        print('score :', self.score)
 
     def best_action(self):
         if random() < self.noise:
@@ -107,46 +118,46 @@ class ReinforcementLearning:
     def move(self, position, action):
         move = MOVES[action]
         new_position = (position[0] + move[0], position[1] + move[1])
-        if self.is_not_allowed(new_position):
-            if self.map[new_position] == MAP_ENEMY:
-                reward = REWARD_ENEMY
-            else:
-                reward = REWARD_WALL
+        reward = self.is_not_allowed(new_position)
+
+        if reward == REWARD_WALL or reward == REWARD_ENEMY:
+            # bouge pas
             new_position = position
-        else:
-            if new_position in self.goal:
-                reward = REWARD_GOAL
-            else:
-                reward = REWARD_DEFAULT
 
         return [new_position, reward]
 
-
     def is_not_allowed(self, position):
-        # si pas dans la map ou si pas vide ou si pas xp
-        # si True, on ne peut pas aller dans cette direction
-        # si False, on peut aller dans cette direction
-
         if position not in self.map:
-            return True
-        if self.map[position] not in [MAP_EMPTY, MAP_XP]:
-            return True
-        # check if adjacent cells are empty or xp
-        if(position[0] + 1 == 20 or position[1] + 1 == 30 or position[0] - 1 == -1 or position[1] - 1 == -1):
-            return True
-        if self.map[(position[0] - 1, position[1])] is MAP_ENEMY:
-            return True
-        if self.map[(position[0] + 1, position[1])] is MAP_ENEMY:
-            return True
-        if self.map[(position[0], position[1] - 1)] is MAP_ENEMY:
-            return True
-        if self.map[(position[0], position[1] + 1)] is MAP_ENEMY:
-            return True
-        if self.map[(position[0] + 1, position[1] + 1)] is MAP_ENEMY:
-            return True
-        if self.map[(position[0] - 1, position[1] - 1)] is MAP_ENEMY:
-            return True
-        return False
+            return REWARD_ENEMY
+
+        if position[0] < 0 or position[1] < 0 or position[0] > GRID_HEIGHT - 1 or position[1] > GRID_WIDTH - 1:
+            return REWARD_WALL
+
+        if self.map[position] == MAP_WALL or \
+                self.map[position] == MAP_WALL_T or \
+                self.map[position] == MAP_OBSTACLE or \
+                self.map[position] == MAP_OBSTACLE2 or \
+                self.map[position] == MAP_OBSTACLE3:
+            return REWARD_WALL
+
+        if self.map[position] == MAP_ENEMY:
+            return REWARD_ENEMY
+
+        if self.map[position] == MAP_XP:
+            return REWARD_GOAL
+
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
+
+        for direction in directions:
+            neighbor_position = (position[0] + direction[0], position[1] + direction[1])
+
+            if self.map.get(neighbor_position) == MAP_XP:
+                return REWARD_NEAR_GOAL
+
+            if self.map.get(neighbor_position) == MAP_ENEMY:
+                return REWARD_NEAR_ENEMY
+
+        return REWARD_DEFAULT
 
     def load(self, filename):
         if exists(filename):
