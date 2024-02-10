@@ -18,7 +18,7 @@ def arg_max(table):
 
 
 class ReinforcementLearning:
-    def __init__(self, learning_rate=0.45, discount_factor=0.5):
+    def __init__(self, learning_rate=0.5, discount_factor=0.75):
         self.goal = {}
         self.position_agent = AGENT_POS
         self.map = {}
@@ -36,7 +36,7 @@ class ReinforcementLearning:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.history = []
-        self.noise = 1
+        self.noise = 0
 
     def get_radar(self, position_agent):
         row, col = position_agent[0], position_agent[1]
@@ -130,7 +130,7 @@ class ReinforcementLearning:
         if position not in self.map:
             return REWARD_ENEMY
 
-        if position[0] < 0 or position[1] < 0 or position[0] > GRID_HEIGHT - 1 or position[1] > GRID_WIDTH - 1:
+        if position[0] < 2 or position[1] < 2 or position[0] > GRID_HEIGHT - 3 or position[1] > GRID_WIDTH - 3:
             return REWARD_WALL
 
         if self.map[position] == MAP_WALL or \

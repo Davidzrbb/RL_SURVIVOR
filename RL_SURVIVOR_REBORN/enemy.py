@@ -31,7 +31,7 @@ class Enemy:
         self.physics_engine_list = []
 
         for sprite in self.enemy_sprite_list:
-            barrier = arcade.AStarBarrierList(sprite, self.env.obstacle_list,
+            barrier = arcade.AStarBarrierList(sprite, self.env.forgive_list_enemies,
                                               SPRITE_SIZE,
                                               self.playing_field_left_boundary,
                                               self.playing_field_right_boundary,
@@ -54,9 +54,9 @@ class Enemy:
             sprite = None
 
             if (rand_sprite):
-                sprite = arcade.Sprite(":resources:images/animated_characters/zombie/zombie_walk0.png", SPRITE_SCALING)
+                sprite = arcade.Sprite(":resources:images/enemies/bee.png", SPRITE_SCALING)
             else:
-                sprite = arcade.Sprite(":resources:images/animated_characters/robot/robot_walk0.png", SPRITE_SCALING)
+                sprite = arcade.Sprite(":resources:images/enemies/fly.png", SPRITE_SCALING)
 
             x = 0
             y = 0

@@ -7,7 +7,7 @@ from utils import state_to_xy
 
 class Environment:
     def __init__(self):
-        self.map = {} #y, x
+        self.map = {}  # y, x
         self.original_map = {}
 
         self.cols = None
@@ -17,6 +17,7 @@ class Environment:
         self.empty_list = None
         self.wall_T_list = None
         self.obstacle_list = None
+        self.forgive_list_enemies = None
 
         self.setup()
 
@@ -27,14 +28,12 @@ class Environment:
         self.wall_T_list = arcade.SpriteList(use_spatial_hash=True)
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.obstacle_list = arcade.SpriteList(use_spatial_hash=True)
+        self.forgive_list_enemies = arcade.SpriteList(use_spatial_hash=True)
         self.empty_list = arcade.SpriteList(use_spatial_hash=True)
 
         self.gen_map()
         self.states = self.map.keys()
         self.set_sprite()
-        
-
-    
 
     def on_draw(self):
         """Render the screen."""
@@ -42,10 +41,11 @@ class Environment:
         arcade.start_render()
         # Draw our sprites
         self.obstacle_list.draw()
+        self.forgive_list_enemies.draw()
         self.wall_list.draw()
         self.wall_T_list.draw()
         self.empty_list.draw()
-        
+
     def gen_map(self):
         # génére WALL
         for row in range(GRID_HEIGHT):
@@ -78,7 +78,7 @@ class Environment:
                             self.map[row, col] = MAP_OBSTACLE3
 
         self.original_map = copy.deepcopy(self.map)
-    
+
     def set_sprite(self):
         for state in self.states:
             if self.map[state] == MAP_WALL:
@@ -127,7 +127,8 @@ class Environment:
                 obstacle_sprite.center_x, obstacle_sprite.center_y = state_to_xy(state)
                 self.empty_list.append(obstacle_sprite)
 
-            elif self.map[state] == MAP_OBSTACLE or self.map[state] == MAP_OBSTACLE2 or self.map[state] == MAP_OBSTACLE3:
+            elif self.map[state] == MAP_OBSTACLE or self.map[state] == MAP_OBSTACLE2 or self.map[
+                state] == MAP_OBSTACLE3:
                 if self.map[state] == MAP_OBSTACLE:
                     obstacle_sprite = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", SPRITE_SCALING,
                                                     hit_box_algorithm="Detailed")
@@ -146,11 +147,10 @@ class Environment:
                 self.obstacle_list.append(obstacle_sprite)
 
                 for sprite in self.wall_list:
-                    self.obstacle_list.append(copy.copy(sprite))
+                    self.forgive_list_enemies.append(copy.copy(sprite))
 
                 for sprite in self.wall_T_list:
-                    self.obstacle_list.append(copy.copy(sprite))
-
+                    self.forgive_list_enemies.append(copy.copy(sprite))
 
     def update_map(self, state, value):
         self.map[state] = value
