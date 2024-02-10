@@ -52,7 +52,7 @@ class MyWindow(arcade.Window):
             self.environment.update_map(self.coin.coin_id_to_pos[id], MAP_XP)
 
         # verifier les colisions entre l'agent et les ennemies
-        self.collision_manager.collision_between_agent_and_ennemies(self.agent, self.enemy, self.health_bar)
+        # self.collision_manager.collision_between_agent_and_ennemies(self.agent, self.enemy, self.health_bar)
 
         # verifier si l'agent est mort
         if self.game_over.is_game_over(self.health_bar):
