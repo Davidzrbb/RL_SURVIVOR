@@ -1,7 +1,7 @@
 import pickle
 from os.path import exists
 
-from utils import state_to_xy, xy_to_state
+from utils import state_to_xy
 from constants import *
 from random import *
 
@@ -19,7 +19,6 @@ def arg_max(table):
 
 class ReinforcementLearning:
     def __init__(self, learning_rate=0.5, discount_factor=0.75):
-        self.goal = {}
         self.position_agent = AGENT_POS
         self.map = {}
         self.state = ()
@@ -37,6 +36,7 @@ class ReinforcementLearning:
         self.discount_factor = discount_factor
         self.history = []
         self.noise = 1
+        self.health_value = 100
 
     def get_radar(self, position_agent):
         row, col = position_agent[0], position_agent[1]
@@ -87,7 +87,6 @@ class ReinforcementLearning:
         self.score = 0
         self.iteration = 0
         self.map = {}
-        self.goal = {}
         self.state = self.get_radar(self.position_agent)
 
     def add_state(self, state):
@@ -96,11 +95,14 @@ class ReinforcementLearning:
             for action in ACTIONS:
                 self.qtable[state][action] = 0.0
 
-    def do(self, map_actual, coin_id_to_pos):
-        self.goal = coin_id_to_pos
+    def do(self, map_actual, health_bar):
+        health_value_actual = health_bar.health_value
         self.map = map_actual
         action = self.best_action()
         self.position_agent, reward = self.move(self.position_agent, action)
+        if health_value_actual < self.health_value:
+            reward += REWARD_ENEMY
+        self.health_value = health_value_actual
         new_state = self.get_radar(self.position_agent)
         self.score += reward
         self.iteration += 1
@@ -155,17 +157,6 @@ class ReinforcementLearning:
 
         if self.map[position] == MAP_XP:
             return REWARD_GOAL
-
-        # directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
-        #
-        # for direction in directions:
-        #     neighbor_position = (position[0] + direction[0], position[1] + direction[1])
-        #
-        #     if self.map.get(neighbor_position) == MAP_XP:
-        #         return REWARD_NEAR_GOAL
-        #
-        #     if self.map.get(neighbor_position) == MAP_ENEMY:
-        #         return REWARD_NEAR_ENEMY
 
         return REWARD_DEFAULT
 

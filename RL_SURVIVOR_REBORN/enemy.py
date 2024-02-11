@@ -100,7 +100,7 @@ class Enemy:
         start = (self.enemy_sprite_list[id].center_x, self.enemy_sprite_list[id].center_y)
         end = (agent.agent_sprite.center_x, agent.agent_sprite.center_y)
         path = arcade.astar_calculate_path(start, end, self.barrier_list[id],
-                                           diagonal_movement=True)
+                                           diagonal_movement=False)
 
         if path and len(path) > 1:
             if self.enemy_sprite_list[id].center_y < path[1][1]:

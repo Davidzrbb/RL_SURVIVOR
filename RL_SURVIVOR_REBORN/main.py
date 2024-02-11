@@ -61,7 +61,7 @@ class MyWindow(arcade.Window):
                 self.reload()
         else:
             # calculer la meilleur action pour l'agent
-            self.reinforcement_learning.do(self.environment.map, self.coin.coin_id_to_pos)
+            self.reinforcement_learning.do(self.environment.map,self.health_bar)
 
             # mettre a jour la position de l'agent
             self.reinforcement_learning.update_player(self.agent)
