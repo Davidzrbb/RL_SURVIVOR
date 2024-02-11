@@ -18,7 +18,7 @@ def arg_max(table):
 
 
 class ReinforcementLearning:
-    def __init__(self, learning_rate=0.5, discount_factor=0.75):
+    def __init__(self, learning_rate=0.9, discount_factor=0.8):
         self.position_agent = AGENT_POS
         self.map = {}
         self.state = ()
@@ -35,7 +35,7 @@ class ReinforcementLearning:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.history = []
-        self.noise = 1
+        self.noise = 0.5
         self.health_value = 100
 
     def get_radar(self, position_agent):

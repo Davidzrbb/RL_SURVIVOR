@@ -13,7 +13,7 @@ class HealthBar:
 
     def setup(self):
         self.health_value = 100
-    
+
         self.empty_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(
             102,
             6,
@@ -42,7 +42,7 @@ class HealthBar:
             (agent.agent_sprite.center_x - 50) + (self.health_value / 2), agent.agent_sprite.center_y + 30)
 
     def loose_hp(self):
-        self.health_value -= 10
+        self.health_value -= 50
 
     def game_over(self):
         return self.health_value <= 0

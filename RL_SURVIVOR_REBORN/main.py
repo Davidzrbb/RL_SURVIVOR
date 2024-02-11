@@ -46,7 +46,7 @@ class MyWindow(arcade.Window):
             self.environment.update_map(self.enemy.enemy_id_to_pos[id], MAP_ENEMY)
 
         # verifier les colisions
-        self.collision_manager.collision_between_bullet_and_enemy(self.bullet, self.enemy, self.coin)
+        self.collision_manager.collision_between_bullet_and_enemy(self.bullet, self.enemy, self.coin, self.environment)
 
         # mettre a jour la position des coins dans la map
         for id in self.coin.coin_id_to_pos:
@@ -56,18 +56,19 @@ class MyWindow(arcade.Window):
         self.collision_manager.collision_between_agent_and_ennemies(self.agent, self.enemy, self.health_bar)
 
         # verifier si l'agent est mort
-        if self.game_over.is_game_over(self.health_bar):
+        is_dead = self.game_over.is_game_over(self.health_bar)
+        if is_dead:
             if self.game_over.wait_3_sec(delta_time):
                 self.reload()
         else:
-            # calculer la meilleur action pour l'agent
-            self.reinforcement_learning.do(self.environment.map,self.health_bar)
+            self.reinforcement_learning.do(self.environment.map, self.health_bar)
 
             # mettre a jour la position de l'agent
             self.reinforcement_learning.update_player(self.agent)
 
             # mettre a jour la map avec la position de l'agent
             self.environment.update_map(self.agent.state, MAP_AGENT)
+
 
         # verifier les colisions entre l'agent et les coins
         self.collision_manager.collision_between_agent_and_coin(self.agent, self.coin, self.xp_bar)

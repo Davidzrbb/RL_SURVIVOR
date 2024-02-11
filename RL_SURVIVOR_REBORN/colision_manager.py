@@ -14,7 +14,7 @@ class CollisionManager:
     def setup(self):
         pass
 
-    def collision_between_bullet_and_enemy(self, bullet, enemy, coin):
+    def collision_between_bullet_and_enemy(self, bullet, enemy, coin, env):
         # on check si le bullet touche un ennemi avec la hitbox
         # si oui on kill le bullet et l'ennemi et on ajoute l'id et la pos de l'ennemi dans la liste des ennemis tués
         # on ne verifie plus par rapport à leur position dans la map pour kill ou non car pas assez précis
@@ -29,7 +29,21 @@ class CollisionManager:
                         enemy.enemy_sprite_list[enemy_sprite_index].center_x,
                         enemy.enemy_sprite_list[enemy_sprite_index].center_y)
                     enemy.enemy_sprite_list[enemy_sprite_index].kill()
-                    coin.add_coin(enemy.enemy_id_pos_removed[id_enemy])
+                    pos_new_coin = enemy.enemy_id_pos_removed[id_enemy]
+                    while env.map[pos_new_coin] != MAP_EMPTY and (
+                            pos_new_coin[0] < 2 or pos_new_coin[1] < 2 or pos_new_coin[0] > GRID_HEIGHT - 3 or
+                            pos_new_coin[1] > GRID_WIDTH - 3):
+                        print("test")
+                        # modifie la position de la coin avec une position voisine
+                        if pos_new_coin[0] < 2:
+                            pos_new_coin = (pos_new_coin[0] + 1, pos_new_coin[1])
+                        if pos_new_coin[1] < 2:
+                            pos_new_coin = (pos_new_coin[0], pos_new_coin[1] + 1)
+                        if pos_new_coin[0] > GRID_HEIGHT - 3:
+                            pos_new_coin = (pos_new_coin[0] - 1, pos_new_coin[1])
+                        if pos_new_coin[1] > GRID_WIDTH - 3:
+                            pos_new_coin = (pos_new_coin[0], pos_new_coin[1] - 1)
+                    coin.add_coin(pos_new_coin)
                 bullet.bullet_id_to_sprite[bullet_id].kill()
                 bullet.bullet_last_pop.append(bullet_id)
                 bullet.bullet_id_to_pos.pop(bullet_id)

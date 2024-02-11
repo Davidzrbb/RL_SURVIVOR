@@ -29,7 +29,6 @@ class Enemy:
 
         self.barrier_list = []
         self.physics_engine_list = []
-
         for sprite in self.enemy_sprite_list:
             barrier = arcade.AStarBarrierList(sprite, self.env.forgive_list_enemies,
                                               SPRITE_SIZE,
@@ -100,7 +99,7 @@ class Enemy:
         start = (self.enemy_sprite_list[id].center_x, self.enemy_sprite_list[id].center_y)
         end = (agent.agent_sprite.center_x, agent.agent_sprite.center_y)
         path = arcade.astar_calculate_path(start, end, self.barrier_list[id],
-                                           diagonal_movement=False)
+                                           diagonal_movement=True)
 
         if path and len(path) > 1:
             if self.enemy_sprite_list[id].center_y < path[1][1]:

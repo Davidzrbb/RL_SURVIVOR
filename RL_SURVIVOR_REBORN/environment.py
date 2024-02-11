@@ -41,7 +41,6 @@ class Environment:
         arcade.start_render()
         # Draw our sprites
         self.obstacle_list.draw()
-        self.forgive_list_enemies.draw()
         self.wall_list.draw()
         self.wall_T_list.draw()
         self.empty_list.draw()
@@ -147,10 +146,10 @@ class Environment:
                 self.obstacle_list.append(obstacle_sprite)
 
                 for sprite in self.wall_list:
-                    self.forgive_list_enemies.append(copy.copy(sprite))
+                    self.obstacle_list.append(copy.copy(sprite))
 
                 for sprite in self.wall_T_list:
-                    self.forgive_list_enemies.append(copy.copy(sprite))
+                    self.obstacle_list.append(copy.copy(sprite))
 
     def update_map(self, state, value):
         self.map[state] = value
