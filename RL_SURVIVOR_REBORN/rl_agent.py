@@ -36,7 +36,7 @@ class ReinforcementLearning:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.history = []
-        self.noise = 0
+        self.noise = 1
 
     def get_radar(self, position_agent):
         row, col = position_agent[0], position_agent[1]
@@ -47,7 +47,14 @@ class ReinforcementLearning:
         radar = []
         for n in neighbors_close:
             if n in self.map:
-                radar.append(self.map[n])
+                if MAP_WALL == self.map[n] \
+                        or MAP_WALL_T == self.map[n] \
+                        or MAP_OBSTACLE == self.map[n] \
+                        or MAP_OBSTACLE2 == self.map[n] \
+                        or MAP_OBSTACLE3 == self.map[n]:
+                    radar.append(MAP_WALL)
+                else:
+                    radar.append(self.map[n])
             else:
                 # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
                 radar.append(MAP_WALL)
@@ -61,7 +68,11 @@ class ReinforcementLearning:
                         radar.append(MAP_ENEMY)
                     elif MAP_XP in list_case_value:
                         radar.append(MAP_XP)
-                    elif MAP_WALL in list_case_value:
+                    elif MAP_WALL in list_case_value \
+                            or MAP_WALL_T in list_case_value \
+                            or MAP_OBSTACLE in list_case_value \
+                            or MAP_OBSTACLE2 in list_case_value \
+                            or MAP_OBSTACLE3 in list_case_value:
                         radar.append(MAP_WALL)
                     else:
                         radar.append(MAP_EMPTY)
@@ -96,8 +107,7 @@ class ReinforcementLearning:
         # Q-learning
         self.add_state(new_state)
         maxQ = max(self.qtable[new_state].values())
-        delta = self.learning_rate * (reward + self.discount_factor * maxQ \
-                                      - self.qtable[self.state][action])
+        delta = self.learning_rate * (reward + self.discount_factor * maxQ - self.qtable[self.state][action])
         self.qtable[self.state][action] += delta
         self.state = new_state
 
@@ -146,16 +156,16 @@ class ReinforcementLearning:
         if self.map[position] == MAP_XP:
             return REWARD_GOAL
 
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
-
-        for direction in directions:
-            neighbor_position = (position[0] + direction[0], position[1] + direction[1])
-
-            if self.map.get(neighbor_position) == MAP_XP:
-                return REWARD_NEAR_GOAL
-
-            if self.map.get(neighbor_position) == MAP_ENEMY:
-                return REWARD_NEAR_ENEMY
+        # directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
+        #
+        # for direction in directions:
+        #     neighbor_position = (position[0] + direction[0], position[1] + direction[1])
+        #
+        #     if self.map.get(neighbor_position) == MAP_XP:
+        #         return REWARD_NEAR_GOAL
+        #
+        #     if self.map.get(neighbor_position) == MAP_ENEMY:
+        #         return REWARD_NEAR_ENEMY
 
         return REWARD_DEFAULT
 
