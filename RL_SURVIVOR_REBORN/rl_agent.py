@@ -47,12 +47,13 @@ class ReinforcementLearning:
         radar = []
         for n in neighbors_close:
             if n in self.map:
-                if MAP_WALL == self.map[n] \
-                        or MAP_WALL_T == self.map[n] \
-                        or MAP_OBSTACLE == self.map[n] \
+                if MAP_OBSTACLE == self.map[n] \
                         or MAP_OBSTACLE2 == self.map[n] \
                         or MAP_OBSTACLE3 == self.map[n]:
                     radar.append(MAP_EMPTY)
+                elif MAP_WALL == self.map[n] \
+                        or MAP_WALL_T == self.map[n]:
+                    radar.append(MAP_WALL)
                 else:
                     radar.append(self.map[n])
             else:
@@ -69,8 +70,9 @@ class ReinforcementLearning:
                     elif MAP_XP in list_case_value:
                         radar.append(MAP_XP)
                     elif MAP_WALL in list_case_value \
-                            or MAP_WALL_T in list_case_value \
-                            or MAP_OBSTACLE in list_case_value \
+                            or MAP_WALL_T in list_case_value:
+                        radar.append(MAP_WALL)
+                    elif MAP_OBSTACLE in list_case_value \
                             or MAP_OBSTACLE2 in list_case_value \
                             or MAP_OBSTACLE3 in list_case_value:
                         radar.append(MAP_EMPTY)
@@ -131,10 +133,10 @@ class ReinforcementLearning:
         move = MOVES[action]
         new_position = (position[0] + move[0], position[1] + move[1])
         reward = self.is_not_allowed(new_position)
-        if reward == REWARD_WALL or reward == REWARD_ENEMY:
+        if reward == REWARD_WALL or reward == REWARD_ENEMY or reward == REWARD_OBSTACLE:
             # bouge pas
             new_position = position
-        if reward == REWARD_WALL:
+        if reward == REWARD_OBSTACLE:
             reward = REWARD_DEFAULT
 
         return [new_position, reward]
@@ -146,12 +148,10 @@ class ReinforcementLearning:
         if position[0] < 2 or position[1] < 2 or position[0] > GRID_HEIGHT - 3 or position[1] > GRID_WIDTH - 3:
             return REWARD_WALL
 
-        if self.map[position] == MAP_WALL or \
-                self.map[position] == MAP_WALL_T or \
-                self.map[position] == MAP_OBSTACLE or \
+        if self.map[position] == MAP_OBSTACLE or \
                 self.map[position] == MAP_OBSTACLE2 or \
                 self.map[position] == MAP_OBSTACLE3:
-            return REWARD_WALL
+            return REWARD_OBSTACLE
 
         if self.map[position] == MAP_ENEMY:
             return REWARD_ENEMY
