@@ -65,15 +65,15 @@ class Environment:
                             self.map[row + 1, col] == self.map[row, col + 1] ==
                             self.map[row - 1, col - 1] == self.map[row + 1, col + 1] == MAP_EMPTY
                     ):
-                        if random.randint(0, 100) < 3:
+                        if random.randint(0, 100) < 0:
                             self.map[row, col] = MAP_OBSTACLE
                             if random.randint(0, 100) < 3:
                                 self.map[row, col + 1] = MAP_OBSTACLE
                             if random.randint(0, 100) < 3:
                                 self.map[row + 1, col] = MAP_OBSTACLE
-                        if random.randint(0, 100) < 3:
+                        if random.randint(0, 100) < 0:
                             self.map[row, col] = MAP_OBSTACLE2
-                        if random.randint(0, 100) < 3:
+                        if random.randint(0, 100) < 0:
                             self.map[row, col] = MAP_OBSTACLE3
 
         self.original_map = copy.deepcopy(self.map)
