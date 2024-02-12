@@ -52,12 +52,12 @@ class ReinforcementLearning:
                         or MAP_OBSTACLE == self.map[n] \
                         or MAP_OBSTACLE2 == self.map[n] \
                         or MAP_OBSTACLE3 == self.map[n]:
-                    radar.append(MAP_WALL)
+                    radar.append(MAP_EMPTY)
                 else:
                     radar.append(self.map[n])
             else:
                 # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
-                radar.append(MAP_WALL)
+                radar.append(MAP_EMPTY)
 
         for n in range(0, len(neighbors_average)):
             list_case_value = []
@@ -73,12 +73,12 @@ class ReinforcementLearning:
                             or MAP_OBSTACLE in list_case_value \
                             or MAP_OBSTACLE2 in list_case_value \
                             or MAP_OBSTACLE3 in list_case_value:
-                        radar.append(MAP_WALL)
+                        radar.append(MAP_EMPTY)
                     else:
                         radar.append(MAP_EMPTY)
                     list_case_value.clear()
             else:
-                radar.append(MAP_WALL)
+                radar.append(MAP_EMPTY)
 
         return tuple(radar)
 
@@ -131,10 +131,11 @@ class ReinforcementLearning:
         move = MOVES[action]
         new_position = (position[0] + move[0], position[1] + move[1])
         reward = self.is_not_allowed(new_position)
-
         if reward == REWARD_WALL or reward == REWARD_ENEMY:
             # bouge pas
             new_position = position
+        if reward == REWARD_WALL:
+            reward = REWARD_DEFAULT
 
         return [new_position, reward]
 

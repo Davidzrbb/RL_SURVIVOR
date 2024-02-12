@@ -28,7 +28,7 @@ class MyWindow(arcade.Window):
         self.collision_manager = CollisionManager()
         self.reinforcement_learning = ReinforcementLearning()
         self.game_over = GameOver()
-
+        self.try_count = 0
 
     def on_update(self, delta_time):
 
@@ -69,7 +69,6 @@ class MyWindow(arcade.Window):
             # mettre a jour la map avec la position de l'agent
             self.environment.update_map(self.agent.state, MAP_AGENT)
 
-
         # verifier les colisions entre l'agent et les coins
         self.collision_manager.collision_between_agent_and_coin(self.agent, self.coin, self.xp_bar)
 
@@ -78,7 +77,7 @@ class MyWindow(arcade.Window):
         self.xp_bar.update(self.agent)
 
         if len(self.enemy.enemy_id_pos_removed) == get_nb_enemies() and get_nb_enemies() != 10:
-            set_nb_enemies(get_nb_enemies() + 2)
+            set_nb_enemies(get_nb_enemies() + 4)
             self.enemy = Enemy(self.environment)
         elif len(self.enemy.enemy_id_pos_removed) == get_nb_enemies() and get_nb_enemies() == 10:
             self.reload()
@@ -100,6 +99,7 @@ class MyWindow(arcade.Window):
         if self.game_over.is_game_over(self.health_bar):
             self.game_over.on_draw()
         # def reload(self):
+        arcade.draw_text(f"Essais: {self.try_count}", 0, 0, arcade.color.RED, 20)
 
     def reload(self):
         self.reinforcement_learning.save_history()
@@ -108,11 +108,12 @@ class MyWindow(arcade.Window):
         self.bullet.setup()
         self.health_bar.setup()
         self.xp_bar.setup()
-        set_nb_enemies(2)
+        set_nb_enemies(4)
         self.enemy.setup()
         self.coin.setup()
         self.reinforcement_learning.reset()
         self.game_over.setup()
+        self.try_count += 1
 
 
 def main():
