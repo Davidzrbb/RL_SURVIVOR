@@ -18,7 +18,7 @@ def arg_max(table):
 
 
 class ReinforcementLearning:
-    def __init__(self, learning_rate=0.9, discount_factor=0.8):
+    def __init__(self, learning_rate=0.5, discount_factor=0.9):
         self.position_agent = AGENT_POS
         self.map = {}
         self.state = ()
@@ -35,7 +35,7 @@ class ReinforcementLearning:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.history = []
-        self.noise = 0.5
+        self.noise = 0
         self.health_value = 100
 
     def get_radar(self, position_agent):
@@ -58,7 +58,7 @@ class ReinforcementLearning:
                     radar.append(self.map[n])
             else:
                 # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
-                radar.append(MAP_EMPTY)
+                radar.append(MAP_WALL)
 
         for n in range(0, len(neighbors_average)):
             list_case_value = []
@@ -80,7 +80,7 @@ class ReinforcementLearning:
                         radar.append(MAP_EMPTY)
                     list_case_value.clear()
             else:
-                radar.append(MAP_EMPTY)
+                radar.append(MAP_WALL)
 
         return tuple(radar)
 
