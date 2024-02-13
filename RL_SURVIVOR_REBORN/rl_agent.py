@@ -18,7 +18,7 @@ def arg_max(table):
 
 
 class ReinforcementLearning:
-    def __init__(self, learning_rate=0.5, discount_factor=0.9):
+    def __init__(self, learning_rate=0.7, discount_factor=0.7):
         self.position_agent = AGENT_POS
         self.map = {}
         self.state = ()
@@ -35,7 +35,7 @@ class ReinforcementLearning:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.history = []
-        self.noise = 0
+        self.noise = 1
         self.health_value = 100
 
     def get_radar(self, position_agent):
@@ -47,7 +47,11 @@ class ReinforcementLearning:
         radar = []
         for n in neighbors_close:
             if n in self.map:
-                if MAP_OBSTACLE == self.map[n] \
+                if MAP_ENEMY == self.map[n]:
+                    radar.append(MAP_ENEMY)
+                elif MAP_XP == self.map[n]:
+                    radar.append(MAP_XP)
+                elif MAP_OBSTACLE == self.map[n] \
                         or MAP_OBSTACLE2 == self.map[n] \
                         or MAP_OBSTACLE3 == self.map[n]:
                     radar.append(MAP_EMPTY)
@@ -55,15 +59,14 @@ class ReinforcementLearning:
                         or MAP_WALL_T == self.map[n]:
                     radar.append(MAP_WALL)
                 else:
-                    radar.append(self.map[n])
+                    radar.append(MAP_EMPTY)
             else:
                 # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
                 radar.append(MAP_WALL)
-
-        for n in range(0, len(neighbors_average)):
-            list_case_value = []
-            if neighbors_average[n] in self.map:
-                list_case_value.append(self.map[neighbors_average[n]])
+        list_case_value = []
+        for n in range(1, len(neighbors_average)):
+            if neighbors_average[n - 1] in self.map:
+                list_case_value.append(self.map[neighbors_average[n - 1]])
                 if n % 9 == 0 and n != 0:
                     if MAP_ENEMY in list_case_value:
                         radar.append(MAP_ENEMY)
@@ -80,7 +83,7 @@ class ReinforcementLearning:
                         radar.append(MAP_EMPTY)
                     list_case_value.clear()
             else:
-                radar.append(MAP_WALL)
+                list_case_value.append(MAP_WALL)
 
         return tuple(radar)
 
@@ -119,7 +122,7 @@ class ReinforcementLearning:
 
     def save_history(self):
         self.history.append(self.score)
-        self.noise -= 0.05
+        self.noise *= 1 - 1E-1
         print('noise :', self.noise)
         print('score :', self.score)
 
