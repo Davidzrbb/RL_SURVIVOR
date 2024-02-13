@@ -64,26 +64,28 @@ class ReinforcementLearning:
                 # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
                 radar.append(MAP_WALL)
         list_case_value = []
-        for n in range(1, len(neighbors_average)):
+        for n in range(1, len(neighbors_average) + 1):
             if neighbors_average[n - 1] in self.map:
                 list_case_value.append(self.map[neighbors_average[n - 1]])
-                if n % 9 == 0 and n != 0:
-                    if MAP_ENEMY in list_case_value:
-                        radar.append(MAP_ENEMY)
-                    elif MAP_XP in list_case_value:
-                        radar.append(MAP_XP)
-                    elif MAP_WALL in list_case_value \
-                            or MAP_WALL_T in list_case_value:
-                        radar.append(MAP_WALL)
-                    elif MAP_OBSTACLE in list_case_value \
-                            or MAP_OBSTACLE2 in list_case_value \
-                            or MAP_OBSTACLE3 in list_case_value:
-                        radar.append(MAP_EMPTY)
-                    else:
-                        radar.append(MAP_EMPTY)
-                    list_case_value.clear()
+                
             else:
                 list_case_value.append(MAP_WALL)
+
+            if n % 9 == 0 and n != 0:
+                if MAP_ENEMY in list_case_value:
+                    radar.append(MAP_ENEMY)
+                elif MAP_XP in list_case_value:
+                    radar.append(MAP_XP)
+                elif MAP_WALL in list_case_value \
+                        or MAP_WALL_T in list_case_value:
+                    radar.append(MAP_WALL)
+                elif MAP_OBSTACLE in list_case_value \
+                        or MAP_OBSTACLE2 in list_case_value \
+                        or MAP_OBSTACLE3 in list_case_value:
+                    radar.append(MAP_EMPTY)
+                else:
+                    radar.append(MAP_EMPTY)
+                list_case_value.clear()
 
         return tuple(radar)
 
