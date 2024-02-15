@@ -45,6 +45,7 @@ class Environment:
         self.wall_T_list.draw()
         self.empty_list.draw()
 
+
     def gen_map(self):
         # génére WALL
         for row in range(GRID_HEIGHT):
@@ -65,15 +66,15 @@ class Environment:
                             self.map[row + 1, col] == self.map[row, col + 1] ==
                             self.map[row - 1, col - 1] == self.map[row + 1, col + 1] == MAP_EMPTY
                     ):
-                        if random.randint(0, 100) < 0:
+                        if random.randint(0, 100) < 1:
                             self.map[row, col] = MAP_OBSTACLE
-                            if random.randint(0, 100) < 3:
+                            if random.randint(0, 100) < 1:
                                 self.map[row, col + 1] = MAP_OBSTACLE
-                            if random.randint(0, 100) < 3:
+                            if random.randint(0, 100) < 1:
                                 self.map[row + 1, col] = MAP_OBSTACLE
-                        if random.randint(0, 100) < 0:
+                        if random.randint(0, 100) < 1:
                             self.map[row, col] = MAP_OBSTACLE2
-                        if random.randint(0, 100) < 0:
+                        if random.randint(0, 100) < 1:
                             self.map[row, col] = MAP_OBSTACLE3
 
         self.original_map = copy.deepcopy(self.map)

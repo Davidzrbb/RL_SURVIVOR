@@ -35,7 +35,7 @@ class ReinforcementLearning:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.history = []
-        self.noise = 1
+        self.noise = 0.3
         self.health_value = 100
 
     def get_radar(self, position_agent):
@@ -54,7 +54,7 @@ class ReinforcementLearning:
                 elif MAP_OBSTACLE == self.map[n] \
                         or MAP_OBSTACLE2 == self.map[n] \
                         or MAP_OBSTACLE3 == self.map[n]:
-                    radar.append(MAP_EMPTY)
+                    radar.append(MAP_WALL)
                 elif MAP_WALL == self.map[n] \
                         or MAP_WALL_T == self.map[n]:
                     radar.append(MAP_WALL)
@@ -64,7 +64,9 @@ class ReinforcementLearning:
                 # si la case n'est pas dans la map, on ajoute MAP_WALL dans radar
                 radar.append(MAP_WALL)
         list_case_value = []
+
         for n in range(1, len(neighbors_average) + 1):
+
             if neighbors_average[n - 1] in self.map:
                 list_case_value.append(self.map[neighbors_average[n - 1]])
                 
@@ -82,7 +84,7 @@ class ReinforcementLearning:
                 elif MAP_OBSTACLE in list_case_value \
                         or MAP_OBSTACLE2 in list_case_value \
                         or MAP_OBSTACLE3 in list_case_value:
-                    radar.append(MAP_EMPTY)
+                    radar.append(MAP_WALL)
                 else:
                     radar.append(MAP_EMPTY)
                 list_case_value.clear()
@@ -138,11 +140,9 @@ class ReinforcementLearning:
         move = MOVES[action]
         new_position = (position[0] + move[0], position[1] + move[1])
         reward = self.is_not_allowed(new_position)
-        if reward == REWARD_WALL or reward == REWARD_ENEMY or reward == REWARD_OBSTACLE:
+        if reward == REWARD_WALL or reward == REWARD_ENEMY:
             # bouge pas
             new_position = position
-        if reward == REWARD_OBSTACLE:
-            reward = REWARD_DEFAULT
 
         return [new_position, reward]
 
@@ -156,7 +156,7 @@ class ReinforcementLearning:
         if self.map[position] == MAP_OBSTACLE or \
                 self.map[position] == MAP_OBSTACLE2 or \
                 self.map[position] == MAP_OBSTACLE3:
-            return REWARD_OBSTACLE
+            return REWARD_WALL
 
         if self.map[position] == MAP_ENEMY:
             return REWARD_ENEMY

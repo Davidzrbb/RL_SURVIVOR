@@ -42,7 +42,7 @@ class HealthBar:
             (agent.agent_sprite.center_x - 50) + (self.health_value / 2), agent.agent_sprite.center_y + 30)
 
     def loose_hp(self):
-        self.health_value -= 50
+        self.health_value -= 10
 
     def game_over(self):
         return self.health_value <= 0

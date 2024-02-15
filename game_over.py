@@ -41,5 +41,6 @@ class GameOver:
         seconds = 3 - int(self.total_time) % 60
         # Use string formatting to create a new text string for our timer
         self.timer.text = f"{seconds:2d}"
+        return True
         if self.total_time > 3:
             return True
